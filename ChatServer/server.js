@@ -14,6 +14,11 @@ const {
 
 const app = express();
 app.use(cors(corsConfig));
+app.use((req, res, next) => {
+  console.log(`Received request: ${req.method} ${req.url}`);
+  next();
+});
+//asdasd
 const server = http.createServer(app);
 const io = socketIo(server, {
   cors: corsConfig,
@@ -68,4 +73,6 @@ io.on("connection", async (socket) => {
 });
 
 const PORT = process.env.PORT || 3001;
-server.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+server.listen(PORT, "0.0.0.0", () =>
+  console.log(`Server running on port ${PORT}`)
+);
