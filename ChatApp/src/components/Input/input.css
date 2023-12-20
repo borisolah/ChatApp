@@ -1,0 +1,27 @@
+.input {
+  font-family: Verdana, Sans-Serif;
+  border: solid 1px #5e4848;
+  width: 99.7%;
+  background-color: transparent;
+  color: #dfdfdf;
+  font-size: 90%;
+  border-radius: 5px 5px 5px 5px;
+}
+.inputBox {
+  display: flex;
+}
+
+.userName {
+  color: rgb(121, 183, 252);
+  word-wrap: break-word;
+  display: inline;
+  white-space: nowrap;
+  font-weight: 550;
+  cursor: pointer;
+}
+
+@media (max-width: 767px) {
+  .userName {
+    display: none;
+  }
+}

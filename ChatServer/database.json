@@ -1,0 +1,18 @@
+{
+  "users": [
+    { "username": "justb612", "password": "1234", "roles": ["user"] },
+    { "username": "The Traveler", "password": "1234", "roles": ["user"] },
+    { "username": "endlessness", "password": "1234", "roles": ["user"] },
+    { "username": "Pandora", "password": "1234", "roles": ["user"] },
+    { "username": "CosmicLion", "password": "1234", "roles": ["user"] },
+    { "username": "Jacubey", "password": "1234", "roles": ["user"] },
+    { "username": "Homo Trypens", "password": "1234", "roles": ["user"] },
+    { "username": "_Trip_", "password": "1234", "roles": ["user"] },
+    { "username": "Flufferus", "password": "1234", "roles": ["user"] },
+    { "username": "jungleheart", "password": "1234", "roles": ["user"] },
+    { "username": "bIRD_", "password": "1234", "roles": ["user"] },
+    { "username": "The Sofa Traveler", "password": "1234", "roles": ["user"] },
+    { "username": "admin", "password": "admin", "roles": ["user"] },
+    { "username": "AAAAAAAAAAAAAAAA", "password": "admin", "roles": ["user"] }
+  ]
+}

@@ -1,0 +1,65 @@
+html,
+body {
+  padding: 0px;
+  margin: 0;
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+  font-family: Verdana, Sans-Serif;
+  background-color: #221f1b;
+}
+
+::-webkit-scrollbar {
+  width: 1em;
+}
+
+::-webkit-scrollbar-track {
+  border-radius: 100vw;
+  margin-block: 0.2em;
+}
+
+::-webkit-scrollbar-thumb {
+  background: hsl(36, 22%, 30%);
+  border-radius: 100vw;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: hsl(36, 22%, 20%);
+}
+.mainBox {
+  display: grid;
+  grid-template-columns: 80% 20%;
+  border: 2px solid #5e4848;
+  margin: 35px 35px 25px 35px;
+  height: 85vh;
+  border-radius: 15px 15px 15px 15px;
+}
+
+.mainChat {
+  background-color: rgba(120, 50, 88, 0.1);
+  border-radius: 15px 0px 0px 15px;
+  padding: 6px 2px 6px 6px;
+  margin: -4px 0px 0px 0px;
+}
+
+@media (max-width: 767px) {
+  .chatUsers {
+    display: none;
+  }
+}
+@media (max-width: 767px) {
+  .mainBox {
+    grid-template-columns: 80%;
+  }
+}
+
+@media (max-width: 767px) {
+  .mainChat {
+    width: 85vw;
+  }
+}
+@media (max-width: 467px) {
+  .mainChat {
+    width: 80vw;
+  }
+}
