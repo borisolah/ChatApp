@@ -1,6 +1,12 @@
 {
   "users": [
     { "username": "justb612", "password": "1234", "roles": ["user"] },
+    { "username": "Kaco", "password": "1234", "roles": ["user"] },
+    { "username": "Roxi", "password": "1234", "roles": ["user"] },
+    { "username": "Jimmy", "password": "1234", "roles": ["user"] },
+    { "username": "Feher", "password": "1234", "roles": ["user"] },
+    { "username": "Bencito", "password": "1234", "roles": ["user"] },
+    { "username": "Attila", "password": "1234", "roles": ["user"] },
     { "username": "The Traveler", "password": "1234", "roles": ["user"] },
     { "username": "endlessness", "password": "1234", "roles": ["user"] },
     { "username": "Pandora", "password": "1234", "roles": ["user"] },
