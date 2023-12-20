@@ -9,8 +9,6 @@ const Login = () => {
   const { setAuth } = useAuth();
 
   const navigate = useNavigate();
-  const location = useLocation();
-  const from = location.state?.from?.pathname || "/";
 
   const userRef = useRef();
   const errRef = useRef();
@@ -41,10 +39,11 @@ const Login = () => {
       );
       const accessToken = response?.data?.accessToken;
       const roles = response?.data?.roles;
+      console.log(response.data);
       setAuth({ user, pwd, roles, accessToken });
       setUser("");
       setPwd("");
-      navigate(from, { replace: true });
+      navigate("/", { replace: true });
     } catch (err) {
       if (!err?.response) {
         setErrMsg("No Server Response");
