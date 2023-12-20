@@ -7,7 +7,7 @@ router.use(express.json());
 
 router.post("/auth", (req, res) => {
   const { user, pwd } = req.body;
-  const dbPath = path.join(__dirname, "database.json");
+  const dbPath = path.join(__dirname, "../database.json");
 
   try {
     const dbRawData = fs.readFileSync(dbPath);
@@ -23,7 +23,7 @@ router.post("/auth", (req, res) => {
       { username: userData.username },
       "mySuperSecretKey12345!@#",
       {
-        expiresIn: "1h",
+        expiresIn: "30d",
       }
     );
     res.json({ accessToken: token, roles: userData.roles });

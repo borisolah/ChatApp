@@ -4,15 +4,15 @@ import ChatMessages from "./ChatMain/ChatMain";
 import ChatUsers from "./ChatUsers/ChatUsers";
 import Input from "./Input/Input";
 import useAuth from "../hooks/useAuth";
+import useUnreadMessages from "../hooks/useUnreadMessages";
 
 const Chat = () => {
   const [socket, setSocket] = useState(null);
   const [onlineUsers, setOnlineUsers] = useState([]);
   const { auth } = useAuth();
-  console.log(auth);
   useEffect(() => {
     if (auth.accessToken) {
-      const newSocket = io("http://34.132.242.170:3001", {
+      const newSocket = io(process.env.REACT_APP_CHAT_SERVER_URL, {
         query: { token: auth.accessToken },
       });
 
@@ -30,6 +30,7 @@ const Chat = () => {
       };
     }
   }, [auth.accessToken]);
+  useUnreadMessages(socket);
 
   return (
     <div className="mainBox">

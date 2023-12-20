@@ -1,8 +1,8 @@
 import { useRef, useState, useEffect } from "react";
 import useAuth from "../hooks/useAuth";
 import { Link, useNavigate, useLocation } from "react-router-dom";
-
 import axios from "../api/axios";
+
 const LOGIN_URL = "/auth";
 
 const Login = () => {
@@ -38,8 +38,11 @@ const Login = () => {
       );
       const accessToken = response?.data?.accessToken;
       const roles = response?.data?.roles;
-      console.log(response.data);
-      setAuth({ user, pwd, roles, accessToken });
+      localStorage.setItem(
+        "auth",
+        JSON.stringify({ user, roles, accessToken })
+      );
+      setAuth({ user, roles, accessToken });
       setUser("");
       setPwd("");
       navigate("/", { replace: true });

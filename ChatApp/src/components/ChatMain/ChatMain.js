@@ -1,6 +1,5 @@
 import React, { useEffect, useState, useRef } from "react";
 import "./chatmessages.css";
-import { Socket } from "socket.io-client";
 
 const ChatMessages = ({ socket }) => {
   const [messages, setMessages] = useState([]);
@@ -8,15 +7,11 @@ const ChatMessages = ({ socket }) => {
 
   useEffect(() => {
     socket.on("initialMessages", (initialMessages) => {
-      console.log("Received initial messages:", initialMessages); // Log received messages
-
       setMessages(initialMessages);
     });
-
     socket.on("message", (newMessage) => {
       setMessages((prevMessages) => [...prevMessages, newMessage]);
     });
-
     return () => {
       socket.off("initialMessages");
       socket.off("message");
@@ -26,7 +21,6 @@ const ChatMessages = ({ socket }) => {
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
-
   useEffect(scrollToBottom, [messages]);
 
   return (

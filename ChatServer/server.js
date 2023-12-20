@@ -1,16 +1,19 @@
+require("dotenv").config();
 const express = require("express");
 const http = require("http");
 const { v4: uuidv4 } = require("uuid");
 const socketIo = require("socket.io");
 const cors = require("cors");
-const loginRoutes = require("./login");
+const loginRoutes = require("./auth/login");
 const jwt = require("jsonwebtoken");
-const corsConfig = require("./corsConfig");
+const corsConfig = require("./config/corsConfig");
+const validateTokenRoute = require("./routes/validateTokenRoute");
 const {
   fetchMessages,
   insertMessage,
   formatMessage,
 } = require("./db/dbOperations");
+const verifyToken = require("./auth/verifyToken");
 
 const app = express();
 app.use(cors(corsConfig));
@@ -18,24 +21,20 @@ app.use((req, res, next) => {
   console.log(`Received request: ${req.method} ${req.url}`);
   next();
 });
-//asdasd
 const server = http.createServer(app);
 const io = socketIo(server, {
   cors: corsConfig,
 });
 app.use(loginRoutes);
 app.use(express.json());
-
+app.use(validateTokenRoute);
 let onlineUsers = [];
 
 io.use((socket, next) => {
   const token = socket.handshake.query.token;
-  if (!token) {
-    return next(new Error("Authentication error: Token not provided"));
-  }
-  jwt.verify(token, "mySuperSecretKey12345!@#", (err, decoded) => {
+  verifyToken(token, (err, decoded) => {
     if (err) {
-      return next(new Error("Authentication error: Invalid token"));
+      return next(err);
     }
     socket.decoded = decoded;
     next();
@@ -68,11 +67,11 @@ io.on("connection", async (socket) => {
   socket.on("disconnect", () => {
     onlineUsers = onlineUsers.filter((user) => user !== username);
     io.emit("onlineUsersList", onlineUsers);
-    console.log("Client disconnected");
   });
 });
 
 const PORT = process.env.PORT || 3001;
-server.listen(PORT, "0.0.0.0", () =>
-  console.log(`Server running on port ${PORT}`)
+const HOST = process.env.CHAT_SERVER_HOST;
+server.listen(PORT, HOST, () =>
+  console.log(`Server running on ${HOST}:${PORT}`)
 );

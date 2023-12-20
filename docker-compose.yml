@@ -19,13 +19,18 @@ services:
     depends_on:
       - db
     environment:
+      - CHAT_SERVER_HOST=0.0.0.0
+      - CHAT_SERVER_PORT=3001
       - DB_HOST=db
       - DB_USER=admin
       - DB_PASSWORD=admin
       - DB_NAME=nexus_chat
 
   chatapp:
-    build: ./ChatApp
+    build: 
+      context: ./ChatApp
+      args:
+        REACT_APP_CHAT_SERVER_URL: http://34.132.242.170:3001
     ports:
       - "3000:80"
     depends_on:
