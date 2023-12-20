@@ -12,7 +12,7 @@ const Chat = () => {
   console.log(auth);
   useEffect(() => {
     if (auth.accessToken) {
-      const newSocket = io("http://localhost:3001", {
+      const newSocket = io("http://34.132.242.170:3001", {
         query: { token: auth.accessToken },
       });
 

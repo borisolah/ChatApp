@@ -1,5 +1,5 @@
 const corsConfig = {
-  origin: "*",
+  origin: "http://34.132.242.170:3000",
   methods: ["GET", "POST"],
   credentials: true,
 };
