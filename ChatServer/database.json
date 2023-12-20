@@ -11,6 +11,8 @@
     { "username": "Flufferus", "password": "1234", "roles": ["user"] },
     { "username": "jungleheart", "password": "1234", "roles": ["user"] },
     { "username": "bIRD_", "password": "1234", "roles": ["user"] },
+    { "username": "dreamer042", "password": "1234", "roles": ["user"] },
+    { "username": "Voidmatrix", "password": "1234", "roles": ["user"] },
     { "username": "The Sofa Traveler", "password": "1234", "roles": ["user"] },
     { "username": "admin", "password": "admin", "roles": ["user"] },
     { "username": "AAAAAAAAAAAAAAAA", "password": "admin", "roles": ["user"] }
