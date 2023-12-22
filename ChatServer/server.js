@@ -26,7 +26,13 @@ const io = socketIo(server, {
 app.use(loginRoutes);
 app.use(express.json());
 app.use(validateTokenRoute);
-
+const kikker = {
+  username: "Kikker",
+  activity: "pleased",
+  substance: "bufo",
+  activity: "vision",
+};
+let onlineUsersList = [kikker];
 io.use((socket, next) => {
   const token = socket.handshake.query.token;
   verifyToken(token, (err, decoded) => {
@@ -37,17 +43,15 @@ io.use((socket, next) => {
     next();
   });
 });
+
 io.on("connection", async (socket) => {
   const username = socket.decoded.username;
   console.log(`${username} connected`);
 
-  userStatus.addOnlineUser(username);
-  console.log(
-    `Current users after ${username} added:`,
-    userStatus.onlineUsersList
-  );
+  userStatus.addOnlineUser(onlineUsersList, username);
+  console.log(`Current users after ${username} added:`, onlineUsersList);
 
-  io.emit("onlineUsersList", userStatus.onlineUsersList);
+  io.emit("onlineUsersList", onlineUsersList);
   const messages = await fetchMessages();
   socket.emit("initialMessages", messages);
 
@@ -60,19 +64,11 @@ io.on("connection", async (socket) => {
   socket.on("disconnect", () => {
     console.log(`${username} disconnected, starting timer`);
     disconnectTimer = setTimeout(() => {
-      userStatus.removeOnlineUser(username);
+      onlineUsersList = userStatus.removeOnlineUser(onlineUsersList, username);
       console.log(`${username} removed after timeout`);
-      console.log(
-        `Current users after ${username} removed:`,
-        userStatus.onlineUsersList
-      );
+      console.log(`Current users after ${username} removed:`, onlineUsersList);
+      io.emit("onlineUsersList", onlineUsersList);
     }, 5000); // 5 seconds for testing
-    io.emit("onlineUsersList", userStatus.onlineUsersList);
-  });
-
-  socket.on("reconnect", () => {
-    console.log(`${username} reconnected, clearing timer`);
-    clearTimeout(disconnectTimer);
   });
 });
 

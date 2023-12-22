@@ -1,11 +1,4 @@
-const kikker = {
-  username: "Kikker",
-  activity: "pleased",
-  substance: "bufo",
-  activity: "vision",
-};
-let onlineUsersList = [kikker];
-function addOnlineUser(username) {
+function addOnlineUser(onlineUsersList, username) {
   const user = onlineUsersList.find((u) => u.username === username);
   if (!user) {
     onlineUsersList.push({
@@ -17,25 +10,25 @@ function addOnlineUser(username) {
   }
 }
 
-function removeOnlineUser(username) {
-  onlineUsersList = onlineUsersList.filter((u) => u.username !== username);
+function removeOnlineUser(onlineUsersList, username) {
+  return onlineUsersList.filter((u) => u.username !== username);
 }
 
-function updateUserActivity(username, activity) {
-  console.log(onlineUsersList);
+function updateUserActivity(onlineUsersList, username, activity) {
   const user = onlineUsersList.find((u) => u.username === username);
   if (user) {
     user.activity = activity;
   }
 }
-function updateUserSubstance(username, substance) {
+
+function updateUserSubstance(onlineUsersList, username, substance) {
   const user = onlineUsersList.find((u) => u.username === username);
   if (user) {
     user.substance = substance;
   }
 }
 
-function updateUserMood(username, mood) {
+function updateUserMood(onlineUsersList, username, mood) {
   const user = onlineUsersList.find((u) => u.username === username);
   if (user) {
     user.mood = mood;
@@ -43,7 +36,6 @@ function updateUserMood(username, mood) {
 }
 
 module.exports = {
-  onlineUsersList,
   addOnlineUser,
   removeOnlineUser,
   updateUserActivity,
