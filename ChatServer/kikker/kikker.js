@@ -59,13 +59,13 @@ function handleUserCommands(io, socket, command, args, onlineUsersList) {
   const username = socket.decoded.username;
   switch (command) {
     case "activity":
-      userStatus.updateUserActivity(username, args);
+      userStatus.updateUserActivity(onlineUsersList, username, args);
       break;
     case "substance":
-      userStatus.updateUserSubstance(username, args);
+      userStatus.updateUserSubstance(onlineUsersList, username, args);
       break;
     case "mood":
-      userStatus.updateUserMood(username, args);
+      userStatus.updateUserMood(onlineUsersList, username, args);
       break;
   }
   io.emit("onlineUsersList", onlineUsersList);
