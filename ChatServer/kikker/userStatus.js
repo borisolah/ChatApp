@@ -1,14 +1,10 @@
 const kikker = {
   username: "Kikker",
-  activity: "vision",
+  activity: "pleased",
   substance: "bufo",
-  mood: "pleased",
+  activity: "vision",
 };
 let onlineUsersList = [kikker];
-const userTimeouts = {};
-
-const TIMEOUT_DURATION = 120000;
-
 function addOnlineUser(username) {
   const user = onlineUsersList.find((u) => u.username === username);
   if (!user) {
@@ -18,26 +14,20 @@ function addOnlineUser(username) {
       substance: null,
       mood: null,
     });
-  } else {
-    clearTimeout(userTimeouts[username]);
-    delete userTimeouts[username];
   }
 }
 
 function removeOnlineUser(username) {
-  userTimeouts[username] = setTimeout(() => {
-    onlineUsersList = onlineUsersList.filter((u) => u.username !== username);
-    delete userTimeouts[username];
-  }, TIMEOUT_DURATION);
+  onlineUsersList = onlineUsersList.filter((u) => u.username !== username);
 }
 
 function updateUserActivity(username, activity) {
+  console.log(onlineUsersList);
   const user = onlineUsersList.find((u) => u.username === username);
   if (user) {
     user.activity = activity;
   }
 }
-
 function updateUserSubstance(username, substance) {
   const user = onlineUsersList.find((u) => u.username === username);
   if (user) {

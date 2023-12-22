@@ -39,19 +39,43 @@ io.use((socket, next) => {
 });
 io.on("connection", async (socket) => {
   const username = socket.decoded.username;
+  console.log(`${username} connected`);
+
   userStatus.addOnlineUser(username);
+  console.log(
+    `Current users after ${username} added:`,
+    userStatus.onlineUsersList
+  );
+
   io.emit("onlineUsersList", userStatus.onlineUsersList);
   const messages = await fetchMessages();
   socket.emit("initialMessages", messages);
+
   socket.on("newMessage", async (messageData) => {
     await processChatMessage(messageData, insertMessage, formatMessage, io);
   });
 
+  let disconnectTimer;
+
   socket.on("disconnect", () => {
-    userStatus.removeOnlineUser(username);
-    io.emit("onlineUsersList", userStatus.getOnlineUsers);
+    console.log(`${username} disconnected, starting timer`);
+    disconnectTimer = setTimeout(() => {
+      userStatus.removeOnlineUser(username);
+      console.log(`${username} removed after timeout`);
+      console.log(
+        `Current users after ${username} removed:`,
+        userStatus.onlineUsersList
+      );
+    }, 5000); // 5 seconds for testing
+    io.emit("onlineUsersList", userStatus.onlineUsersList);
+  });
+
+  socket.on("reconnect", () => {
+    console.log(`${username} reconnected, clearing timer`);
+    clearTimeout(disconnectTimer);
   });
 });
+
 listenForMessages(io);
 
 const PORT = process.env.PORT || 3001;

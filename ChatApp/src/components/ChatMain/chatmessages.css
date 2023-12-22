@@ -22,7 +22,6 @@
   cursor: pointer;
 }
 .messageDate {
-  width: 48px;
   font-size: 70%;
   display: inline-block; /* Change to inline-block */
   word-wrap: break-word;
