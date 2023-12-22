@@ -1,26 +1,13 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useRef } from "react";
 import "./chatmessages.css";
 
-const ChatMessages = ({ socket }) => {
-  const [messages, setMessages] = useState([]);
+const ChatMessages = ({ messages }) => {
   const messagesEndRef = useRef(null);
-
-  useEffect(() => {
-    socket.on("initialMessages", (initialMessages) => {
-      setMessages(initialMessages);
-    });
-    socket.on("message", (newMessage) => {
-      setMessages((prevMessages) => [...prevMessages, newMessage]);
-    });
-    return () => {
-      socket.off("initialMessages");
-      socket.off("message");
-    };
-  }, [socket]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
+
   useEffect(scrollToBottom, [messages]);
 
   return (

@@ -1,5 +1,16 @@
 {
   "users": [
+    { "username": "username1", "password": "1234", "roles": ["user"] },
+    { "username": "username2", "password": "1234", "roles": ["user"] },
+    { "username": "username3", "password": "1234", "roles": ["user"] },
+    { "username": "username4", "password": "1234", "roles": ["user"] },
+    { "username": "username5", "password": "1234", "roles": ["user"] },
+    { "username": "username6", "password": "1234", "roles": ["user"] },
+    { "username": "username7", "password": "1234", "roles": ["user"] },
+    { "username": "username8", "password": "1234", "roles": ["user"] },
+    { "username": "username9", "password": "1234", "roles": ["user"] },
+    { "username": "username10", "password": "1234", "roles": ["user"] },
+    { "username": "username11", "password": "1234", "roles": ["user"] },
     { "username": "justb612", "password": "1234", "roles": ["user"] },
     { "username": "Kaco", "password": "1234", "roles": ["user"] },
     { "username": "Roxi", "password": "1234", "roles": ["user"] },
