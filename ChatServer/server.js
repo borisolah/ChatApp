@@ -28,7 +28,7 @@ app.use(express.json());
 app.use(validateTokenRoute);
 const kikker = {
   username: "Kikker",
-  activity: "pleased",
+  mood: "pleased",
   substance: "bufo",
   activity: "vision",
 };
@@ -44,9 +44,17 @@ io.use((socket, next) => {
   });
 });
 
+const disconnectTimers = {};
+
 io.on("connection", async (socket) => {
   const username = socket.decoded.username;
   console.log(`${username} connected`);
+
+  // Clear disconnect timer if it exists
+  if (disconnectTimers[username]) {
+    clearTimeout(disconnectTimers[username]);
+    delete disconnectTimers[username];
+  }
 
   userStatus.addOnlineUser(onlineUsersList, username);
   console.log(`Current users after ${username} added:`, onlineUsersList);
@@ -59,16 +67,15 @@ io.on("connection", async (socket) => {
     await processChatMessage(messageData, insertMessage, formatMessage, io);
   });
 
-  let disconnectTimer;
-
   socket.on("disconnect", () => {
     console.log(`${username} disconnected, starting timer`);
-    disconnectTimer = setTimeout(() => {
+    disconnectTimers[username] = setTimeout(() => {
       onlineUsersList = userStatus.removeOnlineUser(onlineUsersList, username);
       console.log(`${username} removed after timeout`);
       console.log(`Current users after ${username} removed:`, onlineUsersList);
       io.emit("onlineUsersList", onlineUsersList);
-    }, 5000); // 5 seconds for testing
+      delete disconnectTimers[username];
+    }, 120000); // 5 seconds for testing
   });
 });
 
