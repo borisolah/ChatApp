@@ -79,7 +79,7 @@ io.on("connection", async (socket) => {
   });
 });
 
-listenForMessages(io);
+listenForMessages(io, onlineUsersList);
 
 const PORT = process.env.PORT || 3001;
 const HOST = process.env.CHAT_SERVER_HOST;

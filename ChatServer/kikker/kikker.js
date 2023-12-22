@@ -55,7 +55,7 @@ function handleKikkerCommands(io, command, args) {
   }
 }
 
-function handleUserCommands(io, socket, command, args) {
+function handleUserCommands(io, socket, command, args, onlineUsersList) {
   const username = socket.decoded.username;
   switch (command) {
     case "activity":
@@ -68,9 +68,9 @@ function handleUserCommands(io, socket, command, args) {
       userStatus.updateUserMood(username, args);
       break;
   }
-  io.emit("onlineUsersList", userStatus.onlineUsersList);
+  io.emit("onlineUsersList", onlineUsersList);
 }
-async function listenForMessages(io) {
+async function listenForMessages(io, onlineUsersList) {
   io.on("connection", (socket) => {
     socket.on("newMessage", async (messageData) => {
       const messageText = messageData.message.trim().toLowerCase();
@@ -83,7 +83,7 @@ async function listenForMessages(io) {
         const splitText = messageText.split(" ");
         const command = splitText[0].slice(1);
         const args = splitText.length > 1 ? splitText[1] : "";
-        handleUserCommands(io, socket, command, args);
+        handleUserCommands(io, socket, command, args, onlineUsersList);
       }
     });
   });
