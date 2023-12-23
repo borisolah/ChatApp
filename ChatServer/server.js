@@ -107,7 +107,6 @@ app.post("/upload", upload.single("file"), (req, res, next) => {
     }
   });
 });
-
 app.get("/uploads", (req, res) => {
   fs.readdir(uploadsDir, (err, files) => {
     if (err) {
@@ -115,16 +114,18 @@ app.get("/uploads", (req, res) => {
       return res.status(500).json({ message: "Error reading files" });
     }
     const fileInfos = files.map((file) => {
+      const url = `${req.protocol}://${req.headers.host}/uploads/${file}`;
       const filePath = path.join(uploadsDir, file);
       return {
         name: file,
-        url: `http://34.132.242.170:3001/uploads/${file}`,
+        url: url,
         type: mime.lookup(filePath) || "unknown",
       };
     });
     res.json({ files: fileInfos });
   });
 });
+
 app.use("/uploads", express.static(uploadsDir));
 
 const PORT = process.env.PORT || 3001;

@@ -55,7 +55,7 @@ const Uploads = () => {
           <div key={index} style={styles.fileItem}>
             {file.type.startsWith("image/") ? (
               <img
-                src={`http://localhost:3001/uploads/${file.name}`}
+                src={`${process.env.REACT_APP_CHAT_SERVER_URL}/uploads/${file.name}`}
                 alt={file.name}
                 style={styles.image}
               />
