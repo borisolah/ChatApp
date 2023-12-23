@@ -1,10 +1,13 @@
 require("dotenv").config();
 const express = require("express");
 const http = require("http");
+const path = require("path");
+const fs = require("fs");
 const multer = require("multer");
 const socketIo = require("socket.io");
 const cors = require("cors");
 const loginRoutes = require("./auth/login");
+const mime = require("mime-types");
 const corsConfig = require("./config/corsConfig");
 const uuidv4 = require("uuid").v4;
 const validateTokenRoute = require("./routes/validateTokenRoute");
@@ -16,7 +19,7 @@ const {
 const verifyToken = require("./auth/verifyToken");
 const { listenForMessages } = require("./kikker/kikker");
 const userStatus = require("./kikker/userStatus");
-const processChatMessage = require("./kikker/processChatMessage"); // Adjust the path as necessary
+const processChatMessage = require("./kikker/processChatMessage");
 
 const app = express();
 app.use(cors(corsConfig));
@@ -27,6 +30,9 @@ const io = socketIo(server, {
 app.use(loginRoutes);
 app.use(express.json());
 app.use(validateTokenRoute);
+
+const uploadsDir = path.join(__dirname, "uploads");
+
 const kikker = {
   username: "Kikker",
   mood: "pleased",
@@ -82,20 +88,34 @@ const storage = multer.diskStorage({
 const upload = multer({ storage: storage });
 
 app.post("/upload", upload.single("file"), (req, res, next) => {
-  const token = req.headers.authorization; // or however you're sending the token
-
+  const token = req.headers.authorization;
   verifyToken(token, (err, decoded) => {
     if (err) {
       return res.status(401).json({ message: "Unauthorized: Invalid token" });
     }
-
     req.decoded = decoded;
-
-    // Token is valid, proceed with file upload handling
     console.log("File uploaded:", req.file);
     res.status(200).json({ message: "File uploaded successfully" });
   });
 });
+app.get("/uploads", (req, res) => {
+  fs.readdir(uploadsDir, (err, files) => {
+    if (err) {
+      console.error("Error reading files:", err);
+      return res.status(500).json({ message: "Error reading files" });
+    }
+    const fileInfos = files.map((file) => {
+      const filePath = path.join(uploadsDir, file);
+      return {
+        name: file,
+        url: `http://localhost:3001/uploads/${file}`,
+        type: mime.lookup(filePath) || "unknown",
+      };
+    });
+    res.json({ files: fileInfos });
+  });
+});
+app.use("/uploads", express.static(uploadsDir));
 
 const PORT = process.env.PORT || 3001;
 const HOST = process.env.CHAT_SERVER_HOST;
