@@ -20,6 +20,7 @@ const verifyToken = require("./auth/verifyToken");
 const { listenForMessages } = require("./kikker/kikker");
 const userStatus = require("./kikker/userStatus");
 const processChatMessage = require("./kikker/processChatMessage");
+const processFile = require("./fileProcessor");
 
 const app = express();
 app.use(cors(corsConfig));
@@ -76,6 +77,7 @@ io.on("connection", async (socket) => {
 });
 
 listenForMessages(io, onlineUsersList);
+
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     cb(null, "uploads/");
@@ -89,15 +91,23 @@ const upload = multer({ storage: storage });
 
 app.post("/upload", upload.single("file"), (req, res, next) => {
   const token = req.headers.authorization;
-  verifyToken(token, (err, decoded) => {
+  verifyToken(token, async (err, decoded) => {
     if (err) {
       return res.status(401).json({ message: "Unauthorized: Invalid token" });
     }
     req.decoded = decoded;
-    console.log("File uploaded:", req.file);
-    res.status(200).json({ message: "File uploaded successfully" });
+    try {
+      await processFile(req.file.path);
+      res
+        .status(200)
+        .json({ message: "File uploaded and processed successfully" });
+    } catch (processError) {
+      console.error("Error processing file:", processError);
+      res.status(500).json({ message: "Error processing file" });
+    }
   });
 });
+
 app.get("/uploads", (req, res) => {
   fs.readdir(uploadsDir, (err, files) => {
     if (err) {
