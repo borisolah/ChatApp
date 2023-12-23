@@ -118,7 +118,7 @@ app.get("/uploads", (req, res) => {
       const filePath = path.join(uploadsDir, file);
       return {
         name: file,
-        url: `http://localhost:3001/uploads/${file}`,
+        url: `${process.env.CHAT_SERVER_HOST}/uploads/${file}`,
         type: mime.lookup(filePath) || "unknown",
       };
     });
