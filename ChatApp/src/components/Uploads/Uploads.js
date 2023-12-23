@@ -7,16 +7,14 @@ const Uploads = () => {
   const [uploadedFiles, setUploadedFiles] = useState([]);
 
   useEffect(() => {
-    // Fetch the list of uploaded files
-    fetch("http://localhost:3001/uploads", {
-      // Adjust the URL as needed
+    fetch(`${process.env.REACT_APP_CHAT_SERVER_URL}/uploads`, {
       headers: {
         Authorization: auth.accessToken,
       },
     })
       .then((response) => response.json())
       .then((data) => {
-        setUploadedFiles(data.files); // Assuming the response has a 'files' field
+        setUploadedFiles(data.files);
       })
       .catch((error) => {
         console.error("Error fetching files:", error);
@@ -29,10 +27,10 @@ const Uploads = () => {
         const formData = new FormData();
         formData.append("file", file);
 
-        fetch("http://localhost:3001/upload", {
+        fetch(`${process.env.REACT_APP_CHAT_SERVER_URL}/upload`, {
           method: "POST",
           headers: {
-            Authorization: auth.accessToken, // Sending the token in the Authorization header
+            Authorization: auth.accessToken,
           },
           body: formData,
         })
