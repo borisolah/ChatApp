@@ -1,8 +1,8 @@
 import React from "react";
 import "./chatusers.css";
-import { getActivityImage } from "../../public/index"; // Adjust the path as necessary
-import { getSubstanceImage } from "../../public/index"; // Adjust the path as necessary
-import { getMoodImage } from "../../public/index"; // Adjust the path as necessary
+import { getActivityImage } from "../../public/index";
+import { getSubstanceImage } from "../../public/index";
+import { getMoodImage } from "../../public/index";
 import sprout from "../../public/sprout.png";
 import flower from "../../public/flower.png";
 
