@@ -139,15 +139,17 @@ app.get("/uploads", (req, res) => {
       console.error("Error reading files:", err);
       return res.status(500).json({ message: "Error reading files" });
     }
-    const fileInfos = files.map((file) => {
-      const url = `${req.protocol}://${req.headers.host}/uploads/${file}`;
-      const filePath = path.join(uploadsDir, file);
-      return {
-        name: file,
-        url: url,
-        type: mime.lookup(filePath) || "unknown",
-      };
-    });
+    const fileInfos = files
+      .filter((file) => file !== ".gitignore")
+      .map((file) => {
+        const url = `${req.protocol}://${req.headers.host}/uploads/${file}`;
+        const filePath = path.join(uploadsDir, file);
+        return {
+          name: file,
+          url: url,
+          type: mime.lookup(filePath) || "unknown",
+        };
+      });
     res.json({ files: fileInfos });
   });
 });

@@ -8,13 +8,12 @@ const Uploads = () => {
   const deleteFile = (fileName) => {
     console.log("Delete file:", fileName);
 
-    // Construct the URL for the delete API
     const url = `${process.env.REACT_APP_CHAT_SERVER_URL}/deleteFile/${fileName}`;
 
     fetch(url, {
       method: "DELETE",
       headers: {
-        Authorization: auth.accessToken, // Include the auth token if required
+        Authorization: auth.accessToken,
         "Content-Type": "application/json",
       },
     })
@@ -26,7 +25,6 @@ const Uploads = () => {
       })
       .then((data) => {
         console.log("File deleted successfully:", data);
-        // Optionally, update the state to remove the file from the list
         setUploadedFiles((prevFiles) =>
           prevFiles.filter((file) => file.name !== fileName)
         );
