@@ -7,7 +7,7 @@ function processFile(filePath) {
     const ext = path.extname(filePath).toLowerCase();
     if ([".jpg", ".jpeg", ".png", ".gif", ".tiff", ".bmp"].includes(ext)) {
       sharp(filePath)
-        .withMetadata({ orientation: false })
+        .withMetadata() // Keep this method without options to retain the orientation
         .toBuffer((err, buffer, info) => {
           if (err) reject(err);
           sharp(buffer).toFile(filePath, (err) => {
