@@ -115,16 +115,17 @@ app.get("/uploads", (req, res) => {
       return res.status(500).json({ message: "Error reading files" });
     }
     const fileInfos = files.map((file) => {
-      const filePath = path.join(uploadsDir, file);
+      const url = `${req.protocol}://${req.get("host")}/uploads/${file}`;
       return {
         name: file,
-        url: `${process.env.CHAT_SERVER_HOST}/uploads/${file}`,
-        type: mime.lookup(filePath) || "unknown",
+        url: url,
+        type: mime.lookup(file) || "unknown",
       };
     });
     res.json({ files: fileInfos });
   });
 });
+
 app.use("/uploads", express.static(uploadsDir));
 
 const PORT = process.env.PORT || 3001;
