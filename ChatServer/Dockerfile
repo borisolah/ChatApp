@@ -1,11 +1,12 @@
 # Use an official Node runtime as a parent image
 FROM node:21.4.0
 
-# Install FFmpeg
-RUN apt-get install -y ffmpeg
-
 # Set the working directory in the container
 WORKDIR /usr/src/chatserver
+
+# Update package lists and install FFmpeg
+RUN apt-get update && \
+    apt-get install -y ffmpeg
 
 # Copy package.json and package-lock.json
 COPY package*.json ./
