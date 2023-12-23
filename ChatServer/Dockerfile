@@ -1,6 +1,9 @@
 # Use an official Node runtime as a parent image
 FROM node:21.4.0
 
+# Install FFmpeg
+RUN apt-get install -y ffmpeg
+
 # Set the working directory in the container
 WORKDIR /usr/src/chatserver
 
@@ -18,4 +21,3 @@ EXPOSE 3001
 
 # Define the command to run your app
 CMD [ "node", "server.js" ]
-

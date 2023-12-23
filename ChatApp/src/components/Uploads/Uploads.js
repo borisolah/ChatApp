@@ -5,7 +5,62 @@ import useAuth from "../../hooks/useAuth";
 const Uploads = () => {
   const { auth } = useAuth();
   const [uploadedFiles, setUploadedFiles] = useState([]);
+  const deleteFile = (fileName) => {
+    console.log("Delete file:", fileName);
 
+    // Construct the URL for the delete API
+    const url = `${process.env.REACT_APP_CHAT_SERVER_URL}/deleteFile/${fileName}`;
+
+    fetch(url, {
+      method: "DELETE",
+      headers: {
+        Authorization: auth.accessToken, // Include the auth token if required
+        "Content-Type": "application/json",
+      },
+    })
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error("Network response was not ok");
+        }
+        return response.json();
+      })
+      .then((data) => {
+        console.log("File deleted successfully:", data);
+        // Optionally, update the state to remove the file from the list
+        setUploadedFiles((prevFiles) =>
+          prevFiles.filter((file) => file.name !== fileName)
+        );
+      })
+      .catch((error) => {
+        console.error("Error deleting file:", error);
+      });
+  };
+
+  const renderFile = (file) => {
+    const fileUrl = `${process.env.REACT_APP_CHAT_SERVER_URL}/uploads/${file.name}`;
+
+    return (
+      <div style={styles.fileItem}>
+        {file.type.startsWith("image/") && (
+          <img src={fileUrl} alt={file.name} style={styles.image} />
+        )}
+        {file.type.startsWith("video/") && (
+          <video style={styles.video} controls src={fileUrl} />
+        )}
+        {!file.type.startsWith("image/") && !file.type.startsWith("video/") && (
+          <a href={fileUrl} download style={styles.fileLink}>
+            {file.name}
+          </a>
+        )}
+        <button
+          style={styles.deleteButton}
+          onClick={() => deleteFile(file.name)}
+        >
+          X
+        </button>
+      </div>
+    );
+  };
   useEffect(() => {
     fetch(`${process.env.REACT_APP_CHAT_SERVER_URL}/uploads`, {
       headers: {
@@ -53,15 +108,7 @@ const Uploads = () => {
       <div style={styles.filesContainer}>
         {uploadedFiles.map((file, index) => (
           <div key={index} style={styles.fileItem}>
-            {file.type.startsWith("image/") ? (
-              <img
-                src={`${process.env.REACT_APP_CHAT_SERVER_URL}/uploads/${file.name}`}
-                alt={file.name}
-                style={styles.image}
-              />
-            ) : (
-              <p>{file.name}</p>
-            )}
+            {renderFile(file)}
           </div>
         ))}
       </div>
@@ -92,8 +139,13 @@ const styles = {
     marginBottom: "10px",
   },
   image: {
-    maxWidth: "100px",
-    maxHeight: "100px",
+    width: "282px",
+    height: "160px",
+    objectFit: "cover",
+  },
+  video: {
+    width: "282px",
+    height: "160px",
     objectFit: "cover",
   },
 };

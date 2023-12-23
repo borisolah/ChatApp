@@ -107,6 +107,32 @@ app.post("/upload", upload.single("file"), (req, res, next) => {
     }
   });
 });
+app.delete("/deleteFile/:fileName", (req, res) => {
+  const token = req.headers.authorization;
+  verifyToken(token, async (err, decoded) => {
+    if (err) {
+      return res.status(401).json({ message: "Unauthorized: Invalid token" });
+    }
+    req.decoded = decoded;
+
+    const fileName = req.params.fileName;
+    const filePath = path.join(uploadsDir, fileName);
+
+    fs.unlink(filePath, (err) => {
+      if (err) {
+        console.error("Error deleting file:", err);
+        // Check if the error is because the file was not found
+        if (err.code === "ENOENT") {
+          return res.status(404).json({ message: "File not found" });
+        } else {
+          return res.status(500).json({ message: "Error deleting file" });
+        }
+      }
+      res.json({ message: "File deleted successfully" });
+    });
+  });
+});
+
 app.get("/uploads", (req, res) => {
   fs.readdir(uploadsDir, (err, files) => {
     if (err) {
