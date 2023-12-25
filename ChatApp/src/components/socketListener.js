@@ -1,6 +1,15 @@
 import { useEffect, useState } from "react";
 import io from "socket.io-client";
 
+function abbreviateUrl(url) {
+  if (url.length > 44)
+    return `${url.slice(0, 22)}...${url.slice(url.length - 22)}`;
+  return url;
+}
+
+const UrlRegex =
+  /((http|https|ftp|ftps|ipfs):\/\/[^\\/?#@() ]+\.[a-zA-Z]+(\/[^/? ]+)*\/?(\?[^=& ]+=[^=& ]+(&[^=& ]+=[^=& ]+)*)?)/;
+
 const useSocketListener = (auth) => {
   const [socket, setSocket] = useState(null);
   const [onlineUsers, setOnlineUsers] = useState([]);
@@ -21,6 +30,17 @@ const useSocketListener = (auth) => {
       });
 
       newSocket.on("message", (newMessage) => {
+        // TODO: HTML escaping, temperature conversion, maybe BBcode parsing
+        const match = UrlRegex.exec(newMessage.message);
+        if (match) {
+          const url = match[1];
+          newMessage.message.replace(
+            url,
+            `<a href="${url}" target="_blank" rel="noreferrer">${abbreviateUrl(
+              url
+            )}</a>`
+          );
+        }
         setMessages((prevMessages) => [...prevMessages, newMessage]);
       });
 

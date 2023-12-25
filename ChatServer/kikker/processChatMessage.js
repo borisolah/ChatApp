@@ -15,8 +15,8 @@ async function processChatMessage(
     id: uuidv4(),
     date: new Date(),
   };
+  io.emit("message", formatMessage(newMessage)); // do this immediately, so that kikker answers don't go first
   await insertMessage(newMessage);
-  io.emit("message", formatMessage(newMessage));
 }
 
 module.exports = processChatMessage;
