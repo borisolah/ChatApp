@@ -15,13 +15,13 @@ CREATE TABLE IF NOT EXISTS users (
 INSERT INTO users (id, username, chat_nick, user_color, text_color, mood, substance, activity)
 VALUES (0, 'Kikker', 'Kikker', '#c8abb6', '#91be6c', 'pleased', 'bufo', 'vision')
 ;
-INSERT INTO users (id, username, pw_hash) VALUES
-    (1, 'The Traveler', '1234'),
-    (2, 'justB612', '1234'),
-    (3, 'dreamer042', '1234'),
-    (4, 'sprout', '1234'),
-    (5, 'Homo Trypens', '1234'),
-    (6, 'bIRD_', '1234')
+INSERT INTO users (username, pw_hash) VALUES
+    ('The Traveler', '1234'),
+    ('justB612', '1234'),
+    ('dreamer042', '1234'),
+    ('sprout', '1234'),
+    ('Homo Trypens', '1234'),
+    ('bIRD_', '1234')
 ;
 
 

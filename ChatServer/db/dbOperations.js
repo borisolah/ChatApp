@@ -154,6 +154,15 @@ async function clearAncientHistory() {
     WHERE date < NOW() - interval '1 week';`);
 }
 
+async function addUser(username, password) {
+  console.log("dbOperations.js/addUser:", username);
+  return await pool.query(`
+    INSERT INTO users (username, pw_hash) VALUES
+    ($1, $2)
+    RETURNING *;
+  `, [username, password]);
+}
+
 module.exports = { 
   fetchMessages, insertMessage, formatMessage, isNickInUse,
   getUserByName, getUserByNick, getUserSalt, checkUserPassword, 
@@ -161,5 +170,6 @@ module.exports = {
   updateUserMood, updateUserSubstance, updateUserActivity,
   clearUserState, 
   
-  clearInactiveNicksAndIcons, clearAncientHistory
+  clearInactiveNicksAndIcons, clearAncientHistory,
+  addUser
 };

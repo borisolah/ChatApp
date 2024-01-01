@@ -177,6 +177,7 @@ function handleUserCommands(io, socket, command, args) {
   switch (command) {
     case "help":
       // TODO: open chat help in new tab in the client
+      socket.emit("help");
       break;
     case "join":
       // TODO
@@ -255,8 +256,8 @@ function handleUserCommands(io, socket, command, args) {
         if (tobebanned) {
           if (canKick(user, tobebanned)) {
             // TODO: actually ban that user *from this room*
-            emitMessage(io, kikker, "info", `${tobebanned.username} was banned by ${username} (REASON: ${reason||"no reason"})`);
-            handleUserCommands(io, socket, "kick", args, onlineUsersList);
+            emitMessage(io, kikker, "info", `${tobebanned.username} was banned by ${username} (REASON: ${reason.trim() ||"no reason"})`);
+            handleUserCommands(io, socket, "kick", args.replace(reason, reason || "BAN"));
             break;
           }
           socket.emit("warning", `You do not have sufficient rights to kick ${tobebanned.username}`);

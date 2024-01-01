@@ -4,13 +4,13 @@ const path = require("path");
 const jwt = require("jsonwebtoken");
 const router = express.Router();
 router.use(express.json());
-const { getUserByName } = require("../db/dbOperations.js");
+const dbops = require("../db/dbOperations.js");
 //const { addOnlineUser } = require(""); // TODO
 
-router.post("/auth", async (req, res) => {
+const doAuth = async (req, res) => {
   const { user, pwd } = req.body;
   console.log("/auth login:", user);
-  const userobj = await getUserByName(user);
+  const userobj = await dbops.getUserByName(user) || [];
   // const dbPath = path.join(__dirname, "../database.json");
 
   console.log("received from db:", userobj);
@@ -23,7 +23,9 @@ router.post("/auth", async (req, res) => {
 
     // if (!userData) {
     if (!(userobj['userName'] || userobj['username'])) {
-      return res.status(401).json({ message: "Unauthorized" });
+      await (await dbops.addUser(user, pwd)).rows;
+      return await doAuth(req, res);
+      // return res.status(401).json({ message: "Unauthorized" });
     }
     // TODO: password verification
     // TODO: addOnlineUser(userobj);
@@ -40,6 +42,8 @@ router.post("/auth", async (req, res) => {
     console.error("Error in /auth route: ", error);
     res.status(500).json({ message: "Internal Server Error" });
   }
-});
+}
+
+router.post("/auth", doAuth);
 
 module.exports = router;
