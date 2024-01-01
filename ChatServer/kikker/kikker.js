@@ -4,6 +4,7 @@ const { insertMessage, formatMessage } = require("../db/dbOperations");
 const userStatus = require("./userStatus.js");
 const maxNickLength = 22;
 const kikker = userStatus.findIfOnline('Kikker');
+const svgColors = require("./svgColors.js");
 
 const kikkerShouldAnswers = [
   "Yes", "No", "Seriously?", "Ahem, let me look the other way...", "Kikker ... kikk ... kikkkk ... kikkkkkerrrrrrrrrr",
@@ -33,7 +34,7 @@ function parseTokenFromArgs(args){
       return [token, args.slice(token.length+2).trim()];
     return [args.slice(1), ""];
   }
-  const token = args.slice(0, args.indexOf(' '));
+  const token = args.slice(0, args.indexOf(' ')+1);
   if (token)
     return [token, args.slice(token.length+1)];
   return [args, ""];
@@ -132,6 +133,43 @@ function handleKikkerCommands(io, command, args) {
   }
 }
 
+const regexRgb = /rgb\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\)/;
+function makeHex(intstr, digits=0) {
+  // console.log(intstr);
+  intstr = parseInt(intstr).toString(16);
+  // console.log(intstr);
+  while (digits && intstr.length < digits) {
+    intstr = '0' + intstr;
+  }
+  if (digits && intstr.length > digits)
+    return digits * 'f';
+  return intstr;
+}
+function makeColor(colorname) {
+  console.log("makeColor:", colorname);
+  colorname = colorname.trim().toLowerCase();
+  if (colorname.startsWith('#')) {
+    while (colorname.length < 7 && colorname.length != 4) {
+      colorname = colorname + '0';
+    }
+  } 
+  else if (colorname.startsWith('rgb(')) {
+    const match = regexRgb.exec(colorname);
+    if (match) {
+      colorname = `#${makeHex(match[1],2)}${makeHex(match[2],2)}${makeHex(match[3],2)}`;
+    } else {
+      colorname = '';
+    }
+  } 
+  else { 
+    colorname = svgColors[colorname.replace(' ', '')] || '';
+  }
+  colorname = colorname.substring(0,7);
+  // TODO: coerce colors into the accepted range (not too dark, not too bright)
+  console.log("Returning:", colorname);
+  return colorname;
+}
+
 function handleUserCommands(io, socket, command, args) {
   const username = socket.decoded.username;
   const user = userStatus.findIfOnline(username);
@@ -165,14 +203,18 @@ function handleUserCommands(io, socket, command, args) {
       userStatus.updateUserNick(user, args.slice(0, maxNickLength).trim());
       break;
     case "usercolor":
-      userStatus.updateUserColors(user, args, user.textColor);
+      userStatus.updateUserColors(user, makeColor(parseTokenFromArgs(args)[0]), user.textColor);
       break;
     case "textcolor":
-      userStatus.updateUserColors(user, user.userColor, args);
+      userStatus.updateUserColors(user, user.userColor, makeColor(parseTokenFromArgs(args)[0]));
       break;
     case "colors":
-      [usercolor, textcolor, _] = args.split(' ');
-      userStatus.updateUserColors(user, usercolor, textcolor);
+      const [ usercolor, textcolor ] = parseTokenFromArgs(args);
+      // let [ usercolor, textcolor ] = parseTokenFromArgs(args);
+      // usercolor = makeColor(usercolor);
+      // textcolor = makeColor(textcolor);
+      userStatus.updateUserColors(user, makeColor(usercolor), makeColor(textcolor)); // usercolor, textcolor); //
+      break;
     case "invite":
       // TODO: find args in onlineUsersList if they're not *in this room*
       // TODO: if found, check necessary privileges and if ok, add them to this room.
