@@ -10,7 +10,7 @@ function abbreviateUrl(url) {
   return url;
 }
 
-const UrlRegex = /((http|https|ftp|ftps|ipfs):\/\/[^\\/?#@() ]+\.[a-zA-Z]+(\/[^/? ]+)*\/?(\?[^=& ]+=[^=& ]+(&[^=& ]+=[^=& ]+)*)?)/;
+const UrlRegex = /((http|https|ftp|sftp|ipfs):\/\/[^\\/?#@() ]+\.[a-zA-Z]+(\/[^/? ]+)*\/?(\?[^=& ]+=[^=& ]+(&[^=& ]+=[^=& ]+)*)?)/;
 
 function HTMLescape(text) {
   const div = document.createElement('div');
