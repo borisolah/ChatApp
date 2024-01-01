@@ -80,11 +80,11 @@ async function updateUserNick(username, nick) {
   const user = findIfOnline(username);
   if (user) {
     const inuse = await dbops.isNickInUse(nick);
-    console.log(user.id, username, nick, inuse);
+    console.log("userStatus.updateUserNick:", user.id, username, nick, inuse);
     if (inuse == 0) {
-      user.chatNick = nick || username;
+      user.chatNick = nick.trim() || user.userName;
       onlineUsersList.emit();
-      await dbops.updateUserNick(user.id, nick || username);
+      await dbops.updateUserNick(user.id, user.chatNick);
       console.log("updateUserNick done");
     }
   }
