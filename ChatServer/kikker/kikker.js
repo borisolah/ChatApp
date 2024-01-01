@@ -140,7 +140,7 @@ function handleKikkerCommands(io, command, args) {
   }
 }
 
-const regexRgb = /rgb\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\)/;
+const regexRgb = /rgb\((\d+),(\d+),(\d+)\)/;
 function makeHex(intstr, digits=0) {
   intstr = parseInt(intstr).toString(16);
   while (digits && intstr.length < digits) {
