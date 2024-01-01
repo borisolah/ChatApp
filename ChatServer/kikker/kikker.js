@@ -28,6 +28,7 @@ async function emitMessage(io, user, type, messageContent) {
 }
 
 function parseTokenFromArgs(args){
+  args = args.trim();
   if (args.startsWith('"')) {
     const token = args.slice(1, args.slice(1).indexOf('"')+1);
     if (token)
@@ -36,7 +37,7 @@ function parseTokenFromArgs(args){
   }
   const token = args.slice(0, args.indexOf(' ')+1);
   if (token)
-    return [token, args.slice(token.length+1)];
+    return [token, args.slice(token.length+1).trim()];
   return [args, ""];
 }
 
@@ -135,19 +136,19 @@ function handleKikkerCommands(io, command, args) {
 
 const regexRgb = /rgb\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\)/;
 function makeHex(intstr, digits=0) {
-  // console.log(intstr);
   intstr = parseInt(intstr).toString(16);
-  // console.log(intstr);
+  console.log(intstr);
   while (digits && intstr.length < digits) {
     intstr = '0' + intstr;
   }
   if (digits && intstr.length > digits)
-    return digits * 'f';
+    return 'f'.repeat(digits);
   return intstr;
 }
 function makeColor(colorname) {
   console.log("makeColor:", colorname);
-  colorname = colorname.trim().toLowerCase();
+  colorname = colorname.replaceAll(/\s/g, '').toLowerCase();
+  console.log("makeColor removed any spaces:", colorname);
   if (colorname.startsWith('#')) {
     while (colorname.length < 7 && colorname.length != 4) {
       colorname = colorname + '0';
@@ -155,6 +156,7 @@ function makeColor(colorname) {
   } 
   else if (colorname.startsWith('rgb(')) {
     const match = regexRgb.exec(colorname);
+    console.log("makeColor matching rgb(...) regex:" , match)
     if (match) {
       colorname = `#${makeHex(match[1],2)}${makeHex(match[2],2)}${makeHex(match[3],2)}`;
     } else {
@@ -162,7 +164,7 @@ function makeColor(colorname) {
     }
   } 
   else { 
-    colorname = svgColors[colorname.replace(' ', '')] || '';
+    colorname = svgColors[colorname] || '';
   }
   colorname = colorname.substring(0,7);
   // TODO: coerce colors into the accepted range (not too dark, not too bright)
@@ -210,10 +212,8 @@ function handleUserCommands(io, socket, command, args) {
       userStatus.updateUserColors(user, user.userColor, makeColor(parseTokenFromArgs(args)[0]));
       break;
     case "colors":
-      const [ usercolor, textcolor ] = parseTokenFromArgs(args);
-      // let [ usercolor, textcolor ] = parseTokenFromArgs(args);
-      // usercolor = makeColor(usercolor);
-      // textcolor = makeColor(textcolor);
+      const [ usercolor, rest ] = parseTokenFromArgs(args);
+      const textcolor = parseTokenFromArgs(rest);
       userStatus.updateUserColors(user, makeColor(usercolor), makeColor(textcolor)); // usercolor, textcolor); //
       break;
     case "invite":
