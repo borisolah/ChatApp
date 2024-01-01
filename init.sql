@@ -70,18 +70,18 @@ CREATE TABLE IF NOT EXISTS group_users (
     userid int REFERENCES users
 );
 INSERT INTO group_users (groupid, userid) VALUES
-    (0, 0),
-    (3, 1),
-    (11, 2),
-    (7, 3),
-    (29, 4),
-    (11, 5),
-    (23, 6),
-    (23, 1),
-    (23, 2),
-    (23, 3),
-    (23, 5),
-    (17, 5)
+    (0, 0),  -- kikker kikker
+    (3, 1),  -- trav admin
+    (11, 2), -- justB612 senior
+    (7, 3),  -- dreamer042 mod
+    (29, 4), -- sprout sprout
+    (11, 5), -- HT senior
+    (23, 6), -- bIRD_ user
+    (23, 1), -- trav user
+    (23, 2), -- justB612 user
+    (23, 3), -- dreamer042 user
+    (23, 5), -- HT user
+    (17, 5)  -- HT welcome committee
 ;
 
 CREATE TABLE IF NOT EXISTS channel_uploads (
