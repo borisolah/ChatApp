@@ -17,7 +17,6 @@ const {
   formatMessage,
 } = require("./db/dbOperations");
 const verifyToken = require("./auth/verifyToken");
-const { listenForMessages } = require("./kikker/kikker");
 const userStatus = require("./kikker/userStatus");
 const processChatMessage = require("./kikker/processChatMessage");
 const processFile = require("./fileProcessor");
@@ -34,13 +33,9 @@ app.use(validateTokenRoute);
 
 const uploadsDir = path.join(__dirname, "uploads");
 
-const kikker = {
-  username: "Kikker",
-  mood: "pleased",
-  substance: "bufo",
-  activity: "vision",
-};
-let onlineUsersList = [kikker];
+const onlineUsersList = require('./onlineUsersList.js')
+onlineUsersList.init(io);
+
 const disconnectTimers = {};
 
 io.use((socket, next) => {
@@ -60,23 +55,42 @@ io.on("connection", async (socket) => {
     clearTimeout(disconnectTimers[username]);
     delete disconnectTimers[username];
   }
-  userStatus.addOnlineUser(onlineUsersList, username);
-  io.emit("onlineUsersList", onlineUsersList);
-  const messages = await fetchMessages();
+  userStatus.addOnlineUser(username);
+  const user = onlineUsersList.find((u) => u.userName === username);
+  if (!user || !user.id) {
+    socket.emit("reload");
+    return;
+  }
+  onlineUsersList.emit(socket);
+  socket.to(username).emit("vanish");
+  socket.join(username);
+  socket.join("Welcome Area");
+  socket.emit("join", "Welcome Area");
+  if (user.roles.includes('user')) {
+    socket.join("Questionnaire");
+    socket.emit("join", "Questionnaire");
+    socket.join("Fun and Offtopic");
+    socket.emit("join", "Fun and Offtopic");
+    socket.join("Hyperspace Chat");
+    socket.emit("join", "Hyperspace Chat");
+  }
+  for (let channel of userStatus.getChannelSubscriptions(user)) {
+    socket.join(channel);
+    socket.emit("join", channel);
+  }
+  const messages = await fetchMessages(); // fetchUserChannelsMessages(userid)
   socket.emit("initialMessages", messages);
   socket.on("newMessage", async (messageData) => {
-    await processChatMessage(messageData, insertMessage, formatMessage, io);
+    // console.log(messageData);
+    await processChatMessage(messageData, insertMessage, formatMessage, io, socket, user);
   });
   socket.on("disconnect", () => {
     disconnectTimers[username] = setTimeout(() => {
-      onlineUsersList = userStatus.removeOnlineUser(onlineUsersList, username);
-      io.emit("onlineUsersList", onlineUsersList);
+      userStatus.removeOnlineUser(user);
       delete disconnectTimers[username];
     }, 120000);
   });
 });
-
-listenForMessages(io, onlineUsersList);
 
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
@@ -141,6 +155,7 @@ app.get("/uploads", (req, res) => {
     }
     const fileInfos = files
       .filter((file) => file !== ".gitignore")
+      .sort((a,b) => fs.statSync(path.join(uploadsDir, a)).birthtimeMs - fs.statSync(path.join(uploadsDir, b)).birthtimeMs)
       .map((file) => {
         const url = `${req.protocol}://${req.headers.host}/uploads/${file}`;
         const filePath = path.join(uploadsDir, file);

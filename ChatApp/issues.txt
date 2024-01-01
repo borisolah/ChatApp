@@ -1,0 +1,2 @@
+- Chat Input needs to autofocus when loading the page, switching browser tabs, or switching chat tabs. (autofocus attribute on the input doesn't work, probably because chat scrolling takes focus away immediately)
+- Uploads need to be scrollable, dropzone needs to stay in place at the bottom

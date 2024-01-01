@@ -36,18 +36,29 @@ const Uploads = () => {
 
   const renderFile = (file) => {
     const fileUrl = `${process.env.REACT_APP_CHAT_SERVER_URL}/uploads/${file.name}`;
-
+    const shortName = file.name.substring(37);
     return (
       <div style={styles.fileItem}>
         {file.type.startsWith("image/") && (
-          <img src={fileUrl} alt={file.name} style={styles.image} />
+          <a href={fileUrl} download={shortName} target="_blank" rel="noreferrer">
+            <img src={fileUrl} alt={shortName} title={shortName} style={styles.image} />
+          </a>
         )}
         {file.type.startsWith("video/") && (
-          <video style={styles.video} controls src={fileUrl} />
+          <div>
+            <a href={fileUrl} download={shortName} target="_blank" rel="noreferrer">{shortName}</a><br/>
+            <video style={styles.video} controls src={fileUrl} />
+          </div>
         )}
-        {!file.type.startsWith("image/") && !file.type.startsWith("video/") && (
-          <a href={fileUrl} download style={styles.fileLink}>
-            {file.name}
+        {file.type.startsWith("audio/") && (
+          <div>
+            <a href={fileUrl} download={shortName} target="_blank" rel="noreferrer">{shortName}</a><br/>
+            <audio style={styles.audio} controls src={fileUrl} />
+          </div>
+        )}
+        {!file.type.startsWith("image/") && !file.type.startsWith("video/") && !file.type.startsWith("audio/") && (
+          <a href={fileUrl} download={shortName} style={styles.fileLink} target="_blank" rel="noreferrer">
+            {shortName}
           </a>
         )}
         <button
@@ -59,19 +70,22 @@ const Uploads = () => {
       </div>
     );
   };
-  useEffect(() => {
+  const fetchUploads = () => {
     fetch(`${process.env.REACT_APP_CHAT_SERVER_URL}/uploads`, {
       headers: {
         Authorization: auth.accessToken,
       },
     })
-      .then((response) => response.json())
-      .then((data) => {
-        setUploadedFiles(data.files);
-      })
-      .catch((error) => {
-        console.error("Error fetching files:", error);
-      });
+    .then((response) => response.json())
+    .then((data) => {
+      setUploadedFiles(data.files);
+    })
+    .catch((error) => {
+      console.error("Error fetching files:", error);
+    });
+  }
+  useEffect(() => {
+    fetchUploads();
   }, [auth.accessToken]);
 
   const onDrop = useCallback(
@@ -90,6 +104,7 @@ const Uploads = () => {
           .then((response) => response.json())
           .then((data) => {
             console.log("Success:", data);
+            fetchUploads();
           })
           .catch((error) => {
             console.error("Error:", error);
@@ -144,6 +159,11 @@ const styles = {
   video: {
     width: "282px",
     height: "160px",
+    objectFit: "cover",
+  },
+  audio: {
+    width: "282px",
+    height: "80px",
     objectFit: "cover",
   },
 };

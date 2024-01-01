@@ -12,7 +12,6 @@ const useUnreadMessages = (socket) => {
     };
 
     const handleNewMessage = () => {
-      console.log("New message received");
       if (document.visibilityState === "hidden") {
         setUnreadCount((prev) => prev + 1);
       }
@@ -29,7 +28,7 @@ const useUnreadMessages = (socket) => {
 
   useEffect(() => {
     document.title =
-      unreadCount > 0 ? `[${unreadCount}] React App` : "React App";
+      unreadCount > 0 ? `[${unreadCount}] Chat - DMT-Nexus` : "Chat - DMT-Nexus";
   }, [unreadCount]);
 };
 

@@ -17,7 +17,7 @@ import earth from "./substance/earth.png";
 import flamingo from "./substance/flamingo.png";
 import fleedy from "./substance/fleedy.png";
 import ganja from "./substance/ganja.png";
-import harmala from "./substance/harmala.png";
+import harm from "./substance/harmala.png";
 import hash from "./substance/hash.png";
 import hbwr from "./substance/hbwr.png";
 import iboga from "./substance/iboga.png";
@@ -152,28 +152,6 @@ import kikkerRank from "./kikkerRank.png";
 import kikkerAvatar from "./kikkerAvatar.jpeg";
 
 const activityImages = {
-  pizza,
-  pokes,
-  pot,
-  punununu,
-  rat,
-  rc,
-  realbeer,
-  salvia,
-  shroom,
-  snail,
-  squirrel,
-  sun,
-  sushiSalmon,
-  sushiSpecial2,
-  sushiSpecial3,
-  sushiSpecial,
-  sushi,
-  tea,
-  water,
-  weed,
-  wine,
-  yopo,
   afk,
   bike,
   brew,
@@ -181,7 +159,6 @@ const activityImages = {
   clean,
   coding,
   computer,
-  confused,
   cook,
   cycl,
   didge,
@@ -226,6 +203,7 @@ const substanceImages = {
   amanita,
   aya,
   banana,
+  realbeer,
   beer,
   bird,
   bufo,
@@ -240,7 +218,8 @@ const substanceImages = {
   flamingo,
   fleedy,
   ganja,
-  harmala,
+  pharma,
+  harm,
   hash,
   hbwr,
   iboga,
@@ -260,7 +239,27 @@ const substanceImages = {
   noneSubstance,
   pancake,
   peyote,
-  pharma,
+  pizza,
+  pokes,
+  pot,
+  punununu,
+  rat,
+  rc,
+  salvia,
+  shroom,
+  snail,
+  squirrel,
+  sun,
+  sushiSalmon,
+  sushiSpecial2,
+  sushiSpecial3,
+  sushiSpecial,
+  sushi,
+  tea,
+  water,
+  weed,
+  wine,
+  yopo,
 };
 
 const moodImages = {
@@ -268,6 +267,7 @@ const moodImages = {
   anxiety,
   calm,
   christmas,
+  confused,
   cool,
   cry,
   dead,
@@ -303,16 +303,32 @@ const moodImages = {
 };
 
 export function getSubstanceImage(substance) {
-  console.log(substance);
-  return substance && substanceImages[substance]
-    ? substanceImages[substance]
-    : noneSubstance;
+  if (!substance) 
+    return noneSubstance;
+  for (let sub in substanceImages) {
+    if (substance.indexOf(sub) >= 0) {
+      return substanceImages[sub] || noneSubstance;
+    }
+  }
+  return noneSubstance;
 }
 export function getActivityImage(activity) {
-  return activity && activityImages[activity]
-    ? activityImages[activity]
-    : noneActivity;
+  if (!activity)
+    return noneActivity;
+  for (let sub in activityImages) {
+    if (activity.indexOf(sub) >= 0) {
+      return activityImages[sub];
+    }
+  }
+  return noneActivity;
 }
 export function getMoodImage(mood) {
-  return mood && moodImages[mood] ? moodImages[mood] : noneMood;
+  if (!mood)
+    return noneMood;
+  for (let sub in moodImages) {
+    if (mood.indexOf(sub) >= 0) {
+      return moodImages[sub];
+    }
+  }
+  return noneMood;
 }

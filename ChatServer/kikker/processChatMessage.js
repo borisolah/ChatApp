@@ -1,22 +1,25 @@
 const uuidv4 = require("uuid").v4;
+const { handleCommands } = require("./kikker");
 
 async function processChatMessage(
   messageData,
   insertMessage,
   formatMessage,
-  io
+  io, socket, user
 ) {
-  const messageText = messageData.message.trim().toLowerCase();
-  if (messageText.startsWith("/")) {
-    return;
+  if (!messageData.message.startsWith("/")) {
+    const newMessage = {
+      ...messageData,
+      userid: user.id,
+      type: "message",
+      channel: 1, // TODO: insert the correct channel here. probably set it in the frontend but check if valid here (no eavesdropping or disturbing private chats!)
+      id: uuidv4(),
+      date: new Date(),
+    };
+    io.emit("message", formatMessage(newMessage)); 
+    await insertMessage(newMessage);
   }
-  const newMessage = {
-    ...messageData,
-    id: uuidv4(),
-    date: new Date(),
-  };
-  io.emit("message", formatMessage(newMessage)); // do this immediately, so that kikker answers don't go first
-  await insertMessage(newMessage);
+  handleCommands(io, socket, messageData)  // kikker and /chat
 }
 
 module.exports = processChatMessage;
