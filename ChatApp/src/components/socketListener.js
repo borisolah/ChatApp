@@ -25,6 +25,7 @@ function makeHTML(message) {
     const url = match[1];
     message.message = parse(msg.replace(url, `<a href="${url}" target="_blank" rel="noreferrer">${abbreviateUrl(url)}</a>`)); 
   }
+  return message;
 }
 
 const useSocketListener = (auth) => {
@@ -38,21 +39,28 @@ const useSocketListener = (auth) => {
         query: { token: auth.accessToken },
       });
 
-      newSocket.on("onlineUsersList", (users) => {
+      newSocket.on("onlineUsersList", ({ channel, users}) => {
         console.log("Received userlist:", users);
-        setOnlineUsers(users);
         userStates.setList(users);
+        users = roomManager.onUserList(users, channel);
+        if (users) {
+          setOnlineUsers(users);
+        }
       });
 
       newSocket.on("initialMessages", (initialMessages) => {
-        initialMessages.forEach((msg) => makeHTML(msg))
-        setMessages(initialMessages);
+        initialMessages.forEach((msg) => roomManager.onMessage(makeHTML(msg), false));
+        roomManager.printRoomsSummary(); // DEBUG
+        setMessages(initialMessages.filter((msg) => msg.channel === roomManager.currentRoom()));
       });
 
       newSocket.on("message", (newMessage) => {
         console.log("Received message:", newMessage);
-        makeHTML(newMessage);
-        setMessages((prevMessages) => [...prevMessages, newMessage]);
+        const msg = roomManager.onMessage(makeHTML(newMessage));
+        if (msg) {
+          // console.log(msg.length);
+          setMessages((prevMessages) => [...prevMessages, msg]); //(msg); //
+        }
       });
 
       newSocket.on("warning", (warning) => {
@@ -61,15 +69,19 @@ const useSocketListener = (auth) => {
       });
 
       newSocket.on("join", (room) => {
-        roomManager.join(room);
+        const newroom = roomManager.onJoin(room);
+        if (newroom) {
+          setOnlineUsers(newroom.users); // TODO: uncomment as soon as users per room work right.
+          setMessages(newroom.messages);
+        }
       });
 
       newSocket.on("leave", (room) => {
-        roomManager.leave(room);
+        roomManager.onLeave(room);
       });
 
       newSocket.on("quit", (room) => {
-        roomManager.quit(room);
+        roomManager.onQuit(room);
       });
 
       newSocket.on("reload", () => {
@@ -86,6 +98,12 @@ const useSocketListener = (auth) => {
         newSocket.off("onlineUsersList");
         newSocket.off("initialMessages");
         newSocket.off("message");
+        newSocket.off("warning");
+        newSocket.off("join");
+        newSocket.off("leave");
+        newSocket.off("quit");
+        newSocket.off("reload");
+        newSocket.off("vanish");
         newSocket.disconnect();
       };
     }

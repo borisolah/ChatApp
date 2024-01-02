@@ -1,5 +1,6 @@
 const dbops = require("../db/dbOperations.js");
 const onlineUsersList = require("../onlineUsersList.js");
+const channelManager = require("../channelManager.js");
 
 dbops.clearInactiveNicksAndIcons();
 dbops.clearAncientHistory();
@@ -38,12 +39,12 @@ async function addOnlineUser(username) {
 function getChannelSubscriptions(username) {
   const user = findIfOnline(username);
   // TODO: return dbops.getChannelSubscriptions(user);
-  console.log("getChannelSubscriptions:", username);
+  // console.log("getChannelSubscriptions:", username);
   return [];
 }
 
 function removeOnlineUser(username) {
-  console.log("removeOnlineUser:", username);
+  // console.log("removeOnlineUser:", username);
   // await dbops.removeOnlineUser(username);
   onlineUsersList.remove(findIfOnline(username));
 }
@@ -52,7 +53,7 @@ async function updateUserActivity(username, activity) {
   const user = findIfOnline(username);
   if (user) {
     user.activity = activity;
-    onlineUsersList.emit();
+    channelManager.userChanged(user);
     await dbops.updateUserActivity(user.id, activity);
   }
 }
@@ -61,7 +62,7 @@ async function updateUserSubstance(username, substance) {
   const user = findIfOnline(username);
   if (user) {
     user.substance = substance;
-    onlineUsersList.emit();
+    channelManager.userChanged(user);
     await dbops.updateUserSubstance(user.id, substance);
   }
 }
@@ -70,22 +71,21 @@ async function updateUserMood(username, mood) {
   const user = findIfOnline(username);
   if (user) {
     user.mood = mood;
-    onlineUsersList.emit();
+    channelManager.userChanged(user);
     await dbops.updateUserMood(user.id, mood);
   }
 }
 
 async function updateUserNick(username, nick) {
-  console.log("updateUserNick:", username);
   const user = findIfOnline(username);
+  nick = nick.trim();
   if (user) {
     const inuse = await dbops.isNickInUse(nick);
     console.log("userStatus.updateUserNick:", user.id, username, nick, inuse);
     if (inuse == 0) {
-      user.chatNick = nick.trim() || user.userName;
-      onlineUsersList.emit();
+      user.chatNick = nick || user.userName;
+      channelManager.userChanged(user);
       await dbops.updateUserNick(user.id, user.chatNick);
-      console.log("updateUserNick done");
     }
   }
 }
@@ -95,7 +95,7 @@ async function updateUserColors(username, usercolor, textcolor) {
   if (user) {
     user.userColor = usercolor;
     user.textColor = textcolor;
-    onlineUsersList.emit();
+    channelManager.userChanged(user);
     await dbops.updateUserColors(user.id, usercolor, textcolor);
   }
 }

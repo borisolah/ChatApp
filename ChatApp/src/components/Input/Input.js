@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import "./input.css";
 const userStates = require("../userStates.js");
+const roomManager = require("../roomManager.js");
 
 const prev_messages = [];
 let prev_msg_index = 0;
@@ -18,14 +19,14 @@ function setInputCursorToEnd(delayed=false) {
 const Input = ({ socket, user }) => {
   const [message, setMessage] = useState("");
   const handleKeyDown = (e) => {
-    const { chatNick, userId, userColor, textColor, activeChannel } = userStates.getState(user);
+    const { chatNick, userId, userColor, textColor } = userStates.getState(user);
     const prev = prev_msg_index;
     switch(e.key) {
       case "Enter":
         if (message.trim()) {
           socket.emit("newMessage", { 
             userId, 
-            channel:activeChannel, 
+            channel: roomManager.currentRoom(), 
             userName: chatNick, 
             message, 
             userColor, 

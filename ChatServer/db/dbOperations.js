@@ -72,8 +72,6 @@ async function getUserByName(name) {
     FROM users 
     WHERE username=$1;`, 
   [name]);
-  // const userobj = { ...await res.rows[0] };
-  // return userobj;
   return { ...await res.rows[0] };
 }
 async function getUserByNick(nick) {
@@ -156,6 +154,7 @@ async function clearAncientHistory() {
 
 async function addUser(username, password) {
   console.log("dbOperations.js/addUser:", username);
+  // TODO: generate random salt, give that to the new entry as well
   return await pool.query(`
     INSERT INTO users (username, pw_hash) VALUES
     ($1, $2)

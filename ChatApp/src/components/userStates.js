@@ -6,7 +6,7 @@ function setList(list) {
 
 function getState(name) {
     //console.log(onlineUsers);
-    const dummy = { userName:name , chatNick:name, userColor:'#ababab'};
+    const dummy = { userName:name , chatNick:name };
     if (!onlineUsers) { 
         return dummy;
     }

@@ -14,12 +14,17 @@ const _list = [kikker];
 
 let _io;
 
-function emit(socket=undefined) {
+function emit(socket=undefined, really=false) {
+    if (true) { //!really) {
+        console.log("onlineUsersList.js->emit() was called");
+        return;
+    }
     socket = socket || _io;
     if (socket){
-        socket.emit("onlineUsersList", _list);
+        console.log(_list);
+        socket.emit("onlineUsersList", {channel: 0, users: _list});
     } else {
-        console.error("tried to emit() without a socket");
+        console.log("tried to emit() without a socket");
     }
 }
 

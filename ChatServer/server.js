@@ -36,6 +36,9 @@ const uploadsDir = path.join(__dirname, "uploads");
 const onlineUsersList = require('./onlineUsersList.js')
 onlineUsersList.init(io);
 
+const channelManager = require("./channelManager.js");
+channelManager.init(io);
+
 const disconnectTimers = {};
 
 io.use((socket, next) => {
@@ -61,27 +64,36 @@ io.on("connection", async (socket) => {
     socket.emit("reload");
     return;
   }
-  onlineUsersList.emit(socket);
-  socket.to(username).emit("vanish");
-  socket.join(username);
-  socket.join("Welcome Area");
-  socket.emit("join", "Welcome Area");
+  // onlineUsersList.emit(socket, true); //global userlist - TODO: remove as soon as users per room works right
+  socket.to(username).emit("vanish"); // end any other socket's session that was logged in as the same user.
+  socket.join(username); // with this, we can always io.to(username).emit() later.
+  // socket.join(1);
+  // socket.emit("join", {id:1, name:"Welcome Area"});
+  channelManager.setSocket(user, socket);
+  channelManager.join(1, user);
+  console.log("after channelManager.join");
+  // socket.emit("")
   if (user.roles.includes('user')) {
-    socket.join("Questionnaire");
-    socket.emit("join", "Questionnaire");
-    socket.join("Fun and Offtopic");
-    socket.emit("join", "Fun and Offtopic");
-    socket.join("Hyperspace Chat");
-    socket.emit("join", "Hyperspace Chat");
+    channelManager.join(2, user);
+    channelManager.join(3, user);
+    channelManager.join(4, user);
+    // socket.join(2);
+    // socket.emit("join", {id:2, name:"Questionnaire"});
+    // socket.join(3);
+    // socket.emit("join", {id:3, name:"Fun and Offtopic"});
+    // socket.join(4);
+    // socket.emit("join", {id:4, name:"Hyperspace Chat"});
   }
   for (let channel of userStatus.getChannelSubscriptions(user)) {
-    socket.join(channel);
-    socket.emit("join", channel);
+    // socket.join(channel.id);
+    // socket.emit("join", channel);
+    channelManager.join(channel, user);
   }
-  const messages = await fetchMessages(); // fetchUserChannelsMessages(userid)
+  socket.emit("join", 1); // DEFAULT: Welcome Area
+  const messages = await fetchMessages(); // TODO: fetchUserChannelsMessages(userid)
   socket.emit("initialMessages", messages);
   socket.on("newMessage", async (messageData) => {
-    // console.log(messageData);
+    console.log(messageData);
     await processChatMessage(messageData, insertMessage, formatMessage, io, socket, user);
   });
   socket.on("disconnect", () => {
@@ -112,6 +124,7 @@ app.post("/upload", upload.single("file"), (req, res, next) => {
     req.decoded = decoded;
     try {
       await processFile(req.file.path);
+      // TODO: add this upload to the DB (to both tables messages and uploads)
       res
         .status(200)
         .json({ message: "File uploaded and processed successfully" });
