@@ -189,7 +189,7 @@ function handleUserCommands(io, socket, channel, command, args) {
       channelManager.join(args, user);
       break;
     case "leave":
-      channelManager.leave(args, user)
+      channelManager.leave(channel, user)
       break;
     case "quit":
       // channelManager.quit(user);

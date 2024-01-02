@@ -60,7 +60,6 @@ function getChannel(id) {
 }
 
 function join(channelid, user) {
-    // TODO: create channel if not exists
     if (typeof channelid === "string") {
         channelid = getChannel(channelid);
     }
@@ -83,8 +82,8 @@ function leave(channelid, user) {
         console.error("Channel to leave doesn't exist:", channelid, user);
         return;
     }
-    channel.users.remove(user);
-    sockets[user.id].leave(channelid);
+    channel.users.delete(user);
+    sockets[user.id].leave(channelid);  // TODO: for some reason, rejoin after this seems to not work. find out why.
     emitChannelUserlist(channel);
 }
 
