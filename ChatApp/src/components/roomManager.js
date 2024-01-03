@@ -41,8 +41,9 @@ function onJoin(room) {
     if (typeof room === "number") {
         room = getRoom(room);
     } else {
+        const roomname = room.name;
         room = getRoom(room.id);
-        room.name = room.name; // this allows renaming a room after the fact. necessary because onUserList() may create the room before the name is known.
+        room.name = roomname; // this allows renaming a room after the fact. necessary because onUserList() may create the room before the name is known.
     }
     return switchRoom(room.id);
 }
