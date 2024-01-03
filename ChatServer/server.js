@@ -32,7 +32,7 @@ app.use(express.json());
 app.use(validateTokenRoute);
 
 const uploadsDir = path.join(__dirname, "uploads");
-
+// TEST
 const onlineUsersList = require('./onlineUsersList.js')
 onlineUsersList.init(io);
 
