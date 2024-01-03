@@ -128,8 +128,11 @@ function handleKikkerCommands(io, channel, command, args) {
       numberOfDice = numberOfDice > 42 ? 42 : numberOfDice;
       let diceResults = "";
       for (let i = 0; i < numberOfDice; i++) {
+        if (i) {
+          diceResults += "   ௵ ";
+        }
         const roll = Math.floor(Math.random() * sidesOfDice) + 1;
-        diceResults += `[${i + 1}] ${roll}   ௵ `;
+        diceResults += `[${i + 1}] ${roll}`;
       }
       emitMessage(io, kikker, "message", channel, diceResults.trim());
       break;
