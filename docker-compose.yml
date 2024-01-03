@@ -30,7 +30,7 @@ services:
     build: 
       context: ./ChatApp
       args:
-        REACT_APP_CHAT_SERVER_URL: http://34.132.242.170:3001
+        REACT_APP_CHAT_SERVER_URL: http://34.66.211.252:3001
     ports:
       - "3000:80"
     depends_on:
