@@ -42,6 +42,19 @@ body {
   margin: -4px 0px 0px 0px;
 }
 
+a:visited {
+  color: #bb9933;
+} 
+a:active {
+  color: #aa8822;
+}
+a {
+  color: #ccbbaa;
+}
+a:hover {
+  color: #ddccbb
+}
+
 @media (max-width: 767px) {
   .chatUsers {
     display: none;

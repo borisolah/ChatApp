@@ -17,7 +17,6 @@ const {
   formatMessage,
 } = require("./db/dbOperations");
 const verifyToken = require("./auth/verifyToken");
-const { listenForMessages } = require("./kikker/kikker");
 const userStatus = require("./kikker/userStatus");
 const processChatMessage = require("./kikker/processChatMessage");
 const processFile = require("./fileProcessor");
@@ -34,13 +33,12 @@ app.use(validateTokenRoute);
 
 const uploadsDir = path.join(__dirname, "uploads");
 
-const kikker = {
-  username: "Kikker",
-  mood: "pleased",
-  substance: "bufo",
-  activity: "vision",
-};
-let onlineUsersList = [kikker];
+const onlineUsersList = require('./onlineUsersList.js')
+onlineUsersList.init(io);
+
+const channelManager = require("./channelManager.js");
+channelManager.init(io);
+
 const disconnectTimers = {};
 
 io.use((socket, next) => {
@@ -60,23 +58,39 @@ io.on("connection", async (socket) => {
     clearTimeout(disconnectTimers[username]);
     delete disconnectTimers[username];
   }
-  userStatus.addOnlineUser(onlineUsersList, username);
-  io.emit("onlineUsersList", onlineUsersList);
-  const messages = await fetchMessages();
+  userStatus.addOnlineUser(username);
+  const user = onlineUsersList.find((u) => u.userName === username);
+  if (!user || !user.id) {
+    socket.emit("reload");
+    return;
+  }
+  // onlineUsersList.emit(socket, true); //global userlist - TODO: remove as soon as users per room works right
+  socket.to(username).emit("vanish"); // end any other socket's session that was logged in as the same user.
+  socket.join(username); // with this, we can always io.to(username).emit() later.
+  channelManager.setSocket(user, socket);
+  channelManager.join(1, user);
+  if (user.roles.includes('user')) {
+    channelManager.join(2, user);
+    channelManager.join(3, user);
+    channelManager.join(4, user);
+  }
+  for (let channel of userStatus.getChannelSubscriptions(user)) {
+    channelManager.join(channel, user);
+  }
+  socket.emit("join", 1); // DEFAULT: Welcome Area
+  const messages = await fetchMessages(); // TODO: fetchUserChannelsMessages(userid)
   socket.emit("initialMessages", messages);
   socket.on("newMessage", async (messageData) => {
-    await processChatMessage(messageData, insertMessage, formatMessage, io);
+    console.log(messageData);
+    await processChatMessage(messageData, insertMessage, formatMessage, io, socket, user);
   });
   socket.on("disconnect", () => {
     disconnectTimers[username] = setTimeout(() => {
-      onlineUsersList = userStatus.removeOnlineUser(onlineUsersList, username);
-      io.emit("onlineUsersList", onlineUsersList);
+      userStatus.removeOnlineUser(user);
       delete disconnectTimers[username];
     }, 120000);
   });
 });
-
-listenForMessages(io, onlineUsersList);
 
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
@@ -98,6 +112,7 @@ app.post("/upload", upload.single("file"), (req, res, next) => {
     req.decoded = decoded;
     try {
       await processFile(req.file.path);
+      // TODO: add this upload to the DB (to both tables messages and uploads)
       res
         .status(200)
         .json({ message: "File uploaded and processed successfully" });
@@ -141,6 +156,7 @@ app.get("/uploads", (req, res) => {
     }
     const fileInfos = files
       .filter((file) => file !== ".gitignore")
+      .sort((a,b) => fs.statSync(path.join(uploadsDir, a)).birthtimeMs - fs.statSync(path.join(uploadsDir, b)).birthtimeMs)
       .map((file) => {
         const url = `${req.protocol}://${req.headers.host}/uploads/${file}`;
         const filePath = path.join(uploadsDir, file);

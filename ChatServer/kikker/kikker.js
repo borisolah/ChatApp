@@ -3,28 +3,51 @@ const { v4: uuidv4 } = require("uuid");
 const { insertMessage, formatMessage } = require("../db/dbOperations");
 const userStatus = require("./userStatus.js");
 const maxNickLength = 22;
+const kikker = userStatus.findIfOnline('Kikker');
+const svgColors = require("./svgColors.js");
+const channelManager = require("../channelManager.js");
 
 const kikkerShouldAnswers = [
   "Yes", "No", "Seriously?", "Ahem, let me look the other way...", "Kikker ... kikk ... kikkkk ... kikkkkkerrrrrrrrrr",
   "So you think today IS a good day?", "Hahahaha (sure)", "Pffffft (according to dreamer)", "Wonderful, good thing to perform!"
 ];
 
-async function emitMessage(io, userName, messageContent) {
+async function emitMessage(io, user, type, channel, messageContent) {
+  console.log(channel, typeof channel)
   const message = {
-    userName: userName,
+    userId: user.userId,
+    userName: user.chatNick || user.userName,
+    userColor: user.userColor,
+    textColor: user.textColor,
+    type,
+    channel,
     message: messageContent,
     id: uuidv4(),
     date: new Date(),
   };
 
+  io.to(channel).emit("message", formatMessage(message));
   await insertMessage(message);
-  io.emit("message", formatMessage(message));
 }
 
 function parseTokenFromArgs(args){
-  if (args.startsWith('"'))
-    return args.slice(1, args.slice(1).indexOf('"')) || args.slice(1);
-  return args.slice(0, args.indexOf(' ')) || args;
+  args = args.trim();
+  let token;
+  if (args.startsWith('"')) {
+    token = args.slice(1, args.slice(1).indexOf('"')+1);
+    if (token)
+      return [token.trim(), args.slice(token.length+2).trim()];
+    return [args.slice(1), ""];
+  }
+  const space = args.indexOf(' ');
+  if (space >= 0) {
+    token = args.slice(0, args.indexOf(' '));
+  } else {
+    token = args;
+  }
+  if (token)
+    return [token, args.slice(token.length+1).trim()];
+  return [args, ""];
 }
 
 function highestRole(user) {
@@ -42,9 +65,9 @@ function canKick(banning, banned) {
 }
 
 
-function handleKikkerCommands(io, command, args) {
+function handleKikkerCommands(io, channel, command, args) {
   const randomNum = Math.random();
-  const term = args.trim();
+  const term = (args && args.trim()) || '';
   let Url;
   switch (command) {
     case "choose":
@@ -54,44 +77,49 @@ function handleKikkerCommands(io, command, args) {
         choice = "None of the above";
       } else {
         const options = args.split(/\|{1,2}/).map((s) => s.trim());
-        choice = options[Math.floor(Math.random() * options.length)];
+        choice = options[Math.floor(randomNum * options.length)];
       }
-      emitMessage(io, "Kikker", `The choice is: ${choice}`);
+      emitMessage(io, kikker, "message", channel, `The choice is: ${choice}`);
       break;
     case "should":
-      emitMessage(io, "Kikker", kikkerShouldAnswers[Math.floor(Math.random() * kikkerShouldAnswers.length)]);
+    case "shoudl":
+    case "shouldnt":
+    case "shouldn't":
+    case "shoudlnt":
+    case "shoudln't":
+      emitMessage(io, kikker, "message", channel, kikkerShouldAnswers[Math.floor(randomNum * kikkerShouldAnswers.length)]);
       break;
     case "define":
       Url = `https://www.urbandictionary.com/define.php?term=${encodeURIComponent(
         term
       )}`;
       // TODO: this should contain only the URL, which should be made into <a> in the frontend:
-      emitMessage(io, "Kikker", `Urban definition: ${Url}`); 
+      emitMessage(io, kikker, "message", channel, `Urban definition: ${Url}`); 
       break;
     case "search":
     case "duck":
       Url = `https://duckduckgo.com/?q=${encodeURIComponent(
         term
       )}`;
-      emitMessage(io, "Kikker", `DuckDuckGo results: ${Url}`);
+      emitMessage(io, kikker, "message", channel, `DuckDuckGo results: ${Url}`);
       break;
     case "google":
       Url = `https://www.google.com/search?q=${encodeURIComponent(
         term
       )}`;
-      emitMessage(io, "Kikker", `Google results: ${Url}`);
+      emitMessage(io, kikker, "message", channel, `Google results: ${Url}`);
       break;
     case "youtube":
       Url = `https://www.youtube.com/results?search_query=${encodeURIComponent(
         term
       )}`;
-      emitMessage(io, "Kikker", `Youtube results: ${Url}`);
+      emitMessage(io, kikker, "message", channel, `Youtube results: ${Url}`);
       break;
     case "imdb":
       Url = `https://www.imdb.com/find/?q=${encodeURIComponent(
         term
       )}`;
-      emitMessage(io, "Kikker", `IMDB results: ${Url}`);
+      emitMessage(io, kikker, "message", channel, `IMDB results: ${Url}`);
       break;
     case "dice":
       const argsArray = args.split(" ").map(Number);
@@ -100,56 +128,124 @@ function handleKikkerCommands(io, command, args) {
       numberOfDice = numberOfDice > 42 ? 42 : numberOfDice;
       let diceResults = "";
       for (let i = 0; i < numberOfDice; i++) {
+        if (i) {
+          diceResults += "   ௵ ";
+        }
         const roll = Math.floor(Math.random() * sidesOfDice) + 1;
-        diceResults += `[${i + 1}] ${roll}   ௵ `;
+        diceResults += `[${i + 1}] ${roll}`;
       }
-      emitMessage(io, "Kikker", diceResults.trim());
+      emitMessage(io, kikker, "message", channel, diceResults.trim());
+      break;
+    case "math":
+      // TODO!
       break;
     default:
       // TODO: serve individual kikker symbol if there is one for this user. Otherwise:
-      emitMessage(io, "Kikker", ":)");
+      emitMessage(io, kikker, "message", channel, ":)");
       break;
   }
 }
 
-function handleUserCommands(io, socket, command, args, onlineUsersList) {
+const regexRgb = /rgb\((\d+),(\d+),(\d+)\)/;
+function makeHex(intstr, digits=0) {
+  intstr = parseInt(intstr).toString(16);
+  while (digits && intstr.length < digits) {
+    intstr = '0' + intstr;
+  }
+  if (digits && intstr.length > digits)
+    return 'f'.repeat(digits);
+  return intstr;
+}
+function makeColor(colorname) {
+  colorname = colorname.replaceAll(/\s/g, '').toLowerCase();
+  if (colorname.startsWith('#')) {
+    while (colorname.length < 7 && colorname.length != 4) {
+      colorname = colorname + '0';
+    }
+  } 
+  else if (colorname.startsWith('rgb(')) {
+    const match = regexRgb.exec(colorname);
+    if (match) {
+      colorname = `#${makeHex(match[1],2)}${makeHex(match[2],2)}${makeHex(match[3],2)}`;
+    } else {
+      colorname = '';
+    }
+  } 
+  else { 
+    colorname = svgColors[colorname] || '';
+  }
+  colorname = colorname.substring(0,7);
+  // TODO: coerce colors into the accepted range (not too dark, not too bright)
+  return colorname;
+}
+
+function handleUserCommands(io, socket, channel, command, args) {
   const username = socket.decoded.username;
-  const user = userStatus.findIfOnline(onlineUsersList, username);
+  const user = userStatus.findIfOnline(username);
+  console.log("handleUserCommands:", username, command, args)
   switch (command) {
+    case "help":
+      // TODO: open chat help in new tab in the client
+      socket.emit("help");
+      break;
+    case "join":
+      channelManager.join(args, user);
+      break;
+    case "leave":
+      channelManager.leave(channel, user)
+      break;
+    case "quit":
+      // channelManager.quit(user);
+      break;
+    case "me":
+      io.emit("me", `${username} ${args}`); // signal "me" ok? TODO: channel awareness
+      break;
     case "activity":
-      userStatus.updateUserActivity(onlineUsersList, username, args);
-      io.emit("onlineUsersList", onlineUsersList);
+      userStatus.updateUserActivity(user, args);
       break;
     case "substance":
-      userStatus.updateUserSubstance(onlineUsersList, username, args);
-      io.emit("onlineUsersList", onlineUsersList);
+      userStatus.updateUserSubstance(user, args);
       break;
     case "mood":
-      userStatus.updateUserMood(onlineUsersList, username, args);
-      io.emit("onlineUsersList", onlineUsersList);
+      userStatus.updateUserMood(user, args);
       break;
     case "nick":
-      userStatus.updateUserNick(onlineUsersList, username, args.slice(0, maxNickLength).trim());
-      io.emit("onlineUsersList", onlineUsersList);
+      userStatus.updateUserNick(user, args.slice(0, maxNickLength).trim());
+      break;
+    case "usercolor":
+      userStatus.updateUserColors(user, makeColor(parseTokenFromArgs(args)[0]), user.textColor);
+      break;
+    case "textcolor":
+      userStatus.updateUserColors(user, user.userColor, makeColor(parseTokenFromArgs(args)[0]));
+      break;
+    case "colors":
+      const [ usercolor, rest ] = parseTokenFromArgs(args);
+      const [textcolor, nouse] = parseTokenFromArgs(rest);
+      userStatus.updateUserColors(user, makeColor(usercolor), makeColor(textcolor)); // usercolor, textcolor); //
+      break;
+    case "invite":
+      // TODO: find args in onlineUsersList if they're not *in this room*
+      // TODO: if found, check necessary privileges and if ok, add them to this room.
+      emitMessage(io, kikker, "info", channel, `${args} was invited by ${username}.`);
       break;
     case "pass":
-      const passto = parseTokenFromArgs(args);
-      const thing = args.slice(passto.length + 1).trim();
+      const [passto, thing] = parseTokenFromArgs(args);
+      //const thing = args.slice(passto.length + 1).trim(); // this will start with " if the name was in quotes.
       if (userStatus.findIfOnline(onlineUsersList, passto)) {
         // TODO: (in the frontend?) recognise if this is a special thing with an animation.
-        io.emit("pass", `${username} passes ${thing} to ${passto}`) // 'pass' signal ok?
+        emitMessage(io, user, "pass", channel, `${username} passes ${thing} to ${passto}`) // 'pass' signal ok?
       } else {
         socket.emit("warning", `No such active user: ${passto}`) // 'warning' signal ok?
       }
       break;
     case "kick":
       if (user) {
-        const tobekicked = userStatus.findIfOnline( parseTokenFromArgs(args) );
+        const [kickname, reason] = parseTokenFromArgs(args)
+        const tobekicked = userStatus.findIfOnline( kickname );
         if (tobekicked) {
-          const reason =  args.slice(tobekicked.username.length + 1).trim();
           if (canKick(user, tobekicked)) {
             // TODO: actually kick that user *from this room*
-            io.emit("info", `${tobekicked.username} was kicked by ${username} (REASON: ${reason||"no reason"})`); // signal "info" ok?
+            emitMessage(io, kikker, "info", channel `${tobekicked.username} was kicked by ${username} (REASON: ${reason||"no reason"})`); // signal "info" ok?
             break;
           }
           socket.emit("warning", `You do not have sufficient rights to kick ${tobekicked.username}`);
@@ -158,16 +254,17 @@ function handleUserCommands(io, socket, command, args, onlineUsersList) {
         socket.emit("warning", `No such active user: ${tobekicked.username}`);
         break;
       }
-      socket.emit("reload_chat_page"); // socket used a username that's not in onlineUsersList, make their page reload.
+      socket.emit("reload"); // socket used a username that's not in onlineUsersList, make their page reload.
       break;
     case "ban":
       if (user) {
-        const tobebanned = userStatus.findIfOnline( parseTokenFromArgs(args) );
+        const [banname, reason] = parseTokenFromArgs(args)
+        const tobebanned = userStatus.findIfOnline( banname );
         if (tobebanned) {
-          const reason =  args.slice(tobebanned.username.length + 1).trim();
           if (canKick(user, tobebanned)) {
             // TODO: actually ban that user *from this room*
-            io.emit("info", `${tobebanned.username} was banned by ${username} (REASON: ${reason||"no reason"})`);
+            emitMessage(io, kikker, "info", channel, `${tobebanned.username} was banned by ${username} (REASON: ${reason.trim() ||"no reason"})`);
+            handleUserCommands(io, socket, channel, "kick", args.replace(reason, reason || "BAN"));
             break;
           }
           socket.emit("warning", `You do not have sufficient rights to kick ${tobebanned.username}`);
@@ -176,39 +273,27 @@ function handleUserCommands(io, socket, command, args, onlineUsersList) {
         socket.emit("warning", `No such active user: ${tobebanned.username}`);
         break;
       }
-      socket.emit("reload_chat_page"); // socket used a username that's not in onlineUsersList, make their page reload.
-      break;
-    case "invite":
-      // TODO: find args in onlineUsersList if they're not *in this room*
-      // TODO: if found, check necessary privileges and if ok, add them to this room.
-      io.emit("info", `${args} was invited by ${username}.`);
-      break;
-    case "me":
-      io.emit("me", `${username} ${args}`); // signal "me" ok?
+      socket.emit("reload"); // socket used a username that's not in onlineUsersList, make their page reload.
       break;
   }
 }
 
 
-async function listenForMessages(io, onlineUsersList) {
-  io.on("connection", (socket) => {
-    socket.on("newMessage", async (messageData) => {
-      const msg = messageData.message.trim();
-      if (messageData.message.startsWith('/')) { // only do user commands if there is no space before the /
-        const cend = (msg.indexOf(' ')+1) || msg.length;
-        const command = msg.slice(1, cend).trim().toLowerCase();
-        const args = msg.slice(cend).trim();
-        handleUserCommands(io, socket, command, args, onlineUsersList);
-      }
-      if (msg.slice(0,7).toLowerCase() === "kikker ") {
-        const kmsg = msg.slice(7).trim();
-        const command = kmsg.split(" ")[0].toLowerCase();
-        const args = kmsg.slice(command.length).trim();
-        handleKikkerCommands(io, command, args);
-      }
-    });
-  });
+function handleCommands(io, socket, messageData) {
+  const msg = messageData.message.trim();
+  if (messageData.message.startsWith('/')) { // only do user commands if there is no space before the /
+    const cend = (msg.indexOf(' ')+1) || msg.length;
+    const command = msg.slice(1, cend).trim().toLowerCase();
+    const args = msg.slice(cend).trim();
+    handleUserCommands(io, socket, messageData.channel, command, args);
+  }
+  if (msg.slice(0,6).toLowerCase() === "kikker") {
+    const kmsg = msg.slice(6).trim();
+    const command = kmsg ? kmsg.split(" ")[0].toLowerCase() : '';
+    const args = kmsg.slice(command.length).trim();
+    handleKikkerCommands(io, messageData.channel, command, args);
+  }
 }
 
-module.exports = { listenForMessages };
+module.exports = { handleCommands };
 
