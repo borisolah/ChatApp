@@ -67,26 +67,14 @@ io.on("connection", async (socket) => {
   // onlineUsersList.emit(socket, true); //global userlist - TODO: remove as soon as users per room works right
   socket.to(username).emit("vanish"); // end any other socket's session that was logged in as the same user.
   socket.join(username); // with this, we can always io.to(username).emit() later.
-  // socket.join(1);
-  // socket.emit("join", {id:1, name:"Welcome Area"});
   channelManager.setSocket(user, socket);
   channelManager.join(1, user);
-  console.log("after channelManager.join");
-  // socket.emit("")
   if (user.roles.includes('user')) {
     channelManager.join(2, user);
     channelManager.join(3, user);
     channelManager.join(4, user);
-    // socket.join(2);
-    // socket.emit("join", {id:2, name:"Questionnaire"});
-    // socket.join(3);
-    // socket.emit("join", {id:3, name:"Fun and Offtopic"});
-    // socket.join(4);
-    // socket.emit("join", {id:4, name:"Hyperspace Chat"});
   }
   for (let channel of userStatus.getChannelSubscriptions(user)) {
-    // socket.join(channel.id);
-    // socket.emit("join", channel);
     channelManager.join(channel, user);
   }
   socket.emit("join", 1); // DEFAULT: Welcome Area
