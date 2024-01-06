@@ -94,7 +94,7 @@ function handleKikkerCommands(io, channel, command, args) {
         term
       )}`;
       // TODO: this should contain only the URL, which should be made into <a> in the frontend:
-      emitMessage(io, kikker, "message", channel, `Urban definition: ${Url}`); 
+      emitMessage(io, kikker, "message", channel, `urban definition: ${Url}`); 
       break;
     case "search":
     case "duck":
@@ -103,23 +103,59 @@ function handleKikkerCommands(io, channel, command, args) {
       )}`;
       emitMessage(io, kikker, "message", channel, `DuckDuckGo results: ${Url}`);
       break;
+    case "image":
+      Url = `https://duckduckgo.com/?q=${encodeURIComponent(
+        term + "&iax=images&ia=images"
+      )}`;
+      emitMessage(io, kikker, "message", channel, `images: ${Url}`);
+      break;
+    case "wiki":
+      Url = `https://duckduckgo.com/?q=${encodeURIComponent(
+        term + " site:wiki.dmt-nexus.me"
+      )}`;
+      emitMessage(io, kikker, "message", channel, `wiki results: ${Url}`);
+      break;
+    case "forum":
+      Url = `https://duckduckgo.com/?q=${encodeURIComponent(
+        term + " site:dmt-nexus.me/forum"
+      )}`;
+      emitMessage(io, kikker, "message", channel, `forum results: ${Url}`);
+      break;
     case "google":
       Url = `https://www.google.com/search?q=${encodeURIComponent(
         term
       )}`;
-      emitMessage(io, kikker, "message", channel, `Google results: ${Url}`);
+      emitMessage(io, kikker, "message", channel, `google results: ${Url}`);
       break;
     case "youtube":
       Url = `https://www.youtube.com/results?search_query=${encodeURIComponent(
         term
       )}`;
-      emitMessage(io, kikker, "message", channel, `Youtube results: ${Url}`);
+      emitMessage(io, kikker, "message", channel, `youtube results: ${Url}`);
       break;
     case "imdb":
       Url = `https://www.imdb.com/find/?q=${encodeURIComponent(
         term
       )}`;
-      emitMessage(io, kikker, "message", channel, `IMDB results: ${Url}`);
+      emitMessage(io, kikker, "message", channel, `imdb results: ${Url}`);
+      break;
+    case "paper":
+      Url = `https://scholar.google.com/scholar?q=${encodeURIComponent(
+        term
+      )}`;
+      emitMessage(io, kikker, "message", channel, `google scholar results: ${Url}`);
+      break;
+    case "translate":
+      Url = `https://translate.google.com/?sl=auto&tl=en&text=${encodeURIComponent(
+        term
+      )}&op=translate`;
+      emitMessage(io, kikker, "message", channel, `google translate: ${Url}`);
+      break;
+    case "soundcloud":
+      Url = `https://soundcloud.com/search?q=${encodeURIComponent(
+        term
+      )}`;
+      emitMessage(io, kikker, "message", channel, `soundcloud results: ${Url}`);
       break;
     case "dice":
       const argsArray = args.split(" ").map(Number);

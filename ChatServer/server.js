@@ -81,12 +81,17 @@ io.on("connection", async (socket) => {
   const messages = await fetchMessages(); // TODO: fetchUserChannelsMessages(userid)
   socket.emit("initialMessages", messages);
   socket.on("newMessage", async (messageData) => {
-    console.log(messageData);
-    await processChatMessage(messageData, insertMessage, formatMessage, io, socket, user);
+    //console.log(messageData);
+    try {
+      await processChatMessage(messageData, insertMessage, formatMessage, io, socket, user);
+    } catch (e) {
+      console.log("during processMessage:", e, "\nMessage was\n", messageData);
+    }
   });
   socket.on("disconnect", () => {
     disconnectTimers[username] = setTimeout(() => {
       userStatus.removeOnlineUser(user);
+      channelManager.quit(user, "timeout");
       delete disconnectTimers[username];
     }, 120000);
   });

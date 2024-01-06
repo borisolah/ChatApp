@@ -106,6 +106,7 @@ import computer from "./activity/computer.png";
 import confused from "./activity/confused.png";
 import cook from "./activity/cook.png";
 import cycl from "./activity/cycl.png";
+import dance from "./activity/dance.png";
 import didge from "./activity/didge.png";
 import draw from "./activity/draw.png";
 import eat from "./activity/eat.png";
@@ -161,6 +162,7 @@ const activityImages = {
   computer,
   cook,
   cycl,
+  dance,
   didge,
   draw,
   eat,
@@ -230,6 +232,7 @@ const substanceImages = {
   life,
   lola,
   lsa,
+  lsd:acid,
   mango,
   mdma,
   mesc,
