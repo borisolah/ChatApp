@@ -19,6 +19,7 @@ function findIfOnline(user) {
 
 async function addOnlineUser(username) {
   const user = findIfOnline(username);
+  console.log((user ? '' : 'Not ') + `found user:`, username, user);
   if (!user) {
     const userobj = await dbops.getUserByName(username);
     if (!userobj.userName) {
