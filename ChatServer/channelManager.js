@@ -1,3 +1,5 @@
+const { insertMessage, formatMessage } = require("../db/dbOperations");
+const { v4: uuidv4 } = require("uuid");
 
 const sockets = {};
 let _io;
@@ -37,8 +39,19 @@ function setSocket(user, socket) {
 }
 
 function emitChannelUserlist(channel) {
-    // console.log("emitChannelUserlist:", channel.id, channel.users, channel);
     _io.to(channel.id).emit("onlineUsersList", {channel: channel.id, users: [...channel.users]});
+}
+async function emitChannelInfo(channel, user, verb, msg='') {
+    const message = {
+        channel: channel.id,
+        type: "info", 
+        userid:0, 
+        message:`${user.chatNick} ${verb} the room` + (msg ? ` (${msg})` : ''),
+        id: uuidv4(),
+        date: new Date()
+    }
+    _io.to(channel.id).emit("message", formatMessage(message));
+    await insertMessage(message);
 }
 
 function getChannel(id) {
@@ -52,7 +65,9 @@ function getChannel(id) {
         }
     }
     if (!c) {
+
         // TODO: create channel, assign new channelid from DB
+        
         console.log("Should make new channel now:", id);
         return 0;
     }
@@ -73,10 +88,11 @@ function join(channelid, user) {
     channel.users.add(user);
     sockets[user.id].join(channelid);
     sockets[user.id].emit("join", {id: channel.id, name: channel.name});
+    emitChannelInfo(user, "joined", message);
     emitChannelUserlist(channel);
 }
 
-function leave(channelid, user) {
+function leave(channelid, user, message) {
     const channel = channels[channelid];
     if (!channel) {
         console.error("Channel to leave doesn't exist:", channelid, user);
@@ -84,7 +100,17 @@ function leave(channelid, user) {
     }
     channel.users.delete(user);
     sockets[user.id].leave(channelid);  // TODO: for some reason, rejoin after this seems to not work. find out why.
+    emitChannelInfo(user, "left", message);
     emitChannelUserlist(channel);
+}
+
+function quit(user, message) {
+    for (let channelid in userChannles[user.id]) {
+        leave(channelid, user, message);
+    }
+    sockets[user.id].disconnect(true);
+    delete sockets[user.id];
+    delete userChannels[user.id];
 }
 
 function userChanged(user) {
@@ -95,25 +121,8 @@ function userChanged(user) {
     });
 }
 
-// function setMood(user, nick) {
-
-// }
-
-// function setSubstance(user, nick) {
-
-// }
-
-// function setActivity(user, nick) {
-
-// }
-
-// function setColors(user, nick) {
-
-// }
-
 module.exports = {
     init, setSocket,
-    join, leave,
+    join, leave, quit,
     userChanged,
-    // setNick, setMood, setSubstance, setActivity, setColors
 };
