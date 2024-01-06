@@ -8,7 +8,9 @@ const dbops = require("../db/dbOperations.js");
 //const { addOnlineUser } = require(""); // TODO
 
 const doAuth = async (req, res) => {
-  const { user, pwd } = req.body;
+  let { user, pwd } = req.body;
+  user = user.trim();
+  pwd = pwd.trim();
   console.log("/auth login:", user);
   const userobj = await dbops.getUserByName(user) || [];
   // const dbPath = path.join(__dirname, "../database.json");

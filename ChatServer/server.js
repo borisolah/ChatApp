@@ -54,7 +54,7 @@ io.use((socket, next) => {
 
 io.on("connection", async (socket) => {
 try {
-  const username = socket.decoded.username;
+  const username = socket.decoded.username.trim();
   if (disconnectTimers[username]) {
     clearTimeout(disconnectTimers[username]);
     delete disconnectTimers[username];
