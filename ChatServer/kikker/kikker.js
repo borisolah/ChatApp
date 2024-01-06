@@ -216,7 +216,7 @@ function makeColor(colorname) {
 }
 
 function handleUserCommands(io, socket, channel, command, args) {
-  const username = socket.decoded.username;
+  const username = socket.decoded.username.trim();
   const user = userStatus.findIfOnline(username);
   console.log("handleUserCommands:", username, command, args)
   switch (command) {
