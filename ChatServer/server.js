@@ -53,6 +53,7 @@ io.use((socket, next) => {
 });
 
 io.on("connection", async (socket) => {
+try {
   const username = socket.decoded.username;
   if (disconnectTimers[username]) {
     clearTimeout(disconnectTimers[username]);
@@ -85,17 +86,22 @@ io.on("connection", async (socket) => {
     try {
       await processChatMessage(messageData, insertMessage, formatMessage, io, socket, user);
     } catch (e) {
-      console.log("during processMessage:", e, "\nMessage was\n", messageData);
+      console.log("server.js->socket.on(newMessage): Uncaught error", e, "\nMessage was\n", messageData);
     }
   });
   socket.on("disconnect", () => {
     disconnectTimers[username] = setTimeout(() => {
-      userStatus.removeOnlineUser(user);
-      channelManager.quit(user, "timeout");
-      delete disconnectTimers[username];
-    }, 120000);
+      try {
+        delete disconnectTimers[username];
+        userStatus.removeOnlineUser(user);
+        channelManager.quit(user, "timeout");
+      } catch (error) {
+        console.log("server.js->socket.on(disconnect): Uncaught error", error);
+    }}, 120000);
   });
-});
+} catch (error) {
+  console.log("server.js->io.on(connect): Uncaught error", error);
+}});
 
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {

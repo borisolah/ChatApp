@@ -108,7 +108,11 @@ function quit(user, message) {
     for (let channelid in userChannels[user.id]) {
         leave(channelid, user, message);
     }
-    sockets[user.id].disconnect(true);
+    try {
+        sockets[user.id].disconnect(true);
+    } catch {
+        console.error("channelManager.quit(): user", user.id, "- no socket to disconnect");
+    }
     delete sockets[user.id];
     delete userChannels[user.id];
 }
