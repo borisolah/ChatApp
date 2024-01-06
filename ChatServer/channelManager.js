@@ -1,4 +1,4 @@
-const { insertMessage, formatMessage } = require("../db/dbOperations");
+const { insertMessage, formatMessage } = require("./db/dbOperations");
 const { v4: uuidv4 } = require("uuid");
 
 const sockets = {};
@@ -88,7 +88,7 @@ function join(channelid, user) {
     channel.users.add(user);
     sockets[user.id].join(channelid);
     sockets[user.id].emit("join", {id: channel.id, name: channel.name});
-    emitChannelInfo(user, "joined", message);
+    emitChannelInfo(channelid, user, "joined");
     emitChannelUserlist(channel);
 }
 
@@ -100,12 +100,12 @@ function leave(channelid, user, message) {
     }
     channel.users.delete(user);
     sockets[user.id].leave(channelid);  // TODO: for some reason, rejoin after this seems to not work. find out why.
-    emitChannelInfo(user, "left", message);
+    emitChannelInfo(channelid, user, "left", message);
     emitChannelUserlist(channel);
 }
 
 function quit(user, message) {
-    for (let channelid in userChannles[user.id]) {
+    for (let channelid in userChannels[user.id]) {
         leave(channelid, user, message);
     }
     sockets[user.id].disconnect(true);
