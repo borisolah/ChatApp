@@ -15,10 +15,12 @@ const ChatMessages = ({ messages }) => {
       {messages.map((message) => (
         <div className="chatMessageBox" key={message.id}>
           <div className="messageBox messageDate">{message.date}</div>{" "}
-          <div className="messageBox">
-            ‹<span className="messageBox messageName" style={{color: message.userColor}}>{message.userName || message.username}</span>›
-          </div>
-          <div className="messageBox messageMessage" style={{color: message.textColor}}>{message.message}</div>
+          { message.type === "message" &&
+            <div className="messageBox">
+              ‹<span className="messageBox messageName" style={{color: message.userColor}}>{message.userName || message.username}</span>›
+            </div>
+          }
+          <div className="messageBox messageMessage" style={{color: message.type==="message" ? message.textColor : "#977575"}}>{message.message}</div>
         </div>
       ))}
       <div ref={messagesEndRef} />
