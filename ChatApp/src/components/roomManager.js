@@ -16,7 +16,7 @@ function switchRoom(roomid) {
     uiState.currentRoom = roomid;
     // TODO: visually represent which room we're in.
     return {
-        users: room.users || uiState.allOnlineUsers, 
+        users: room.users, 
         messages: room.messages
     };
 }
@@ -48,13 +48,16 @@ function onJoin(room) {
     return switchRoom(room.id);
 }
 
-function onLeave(roomid) {
+function onLeave(room) {
+    if (typeof room === "number") {
+        room = getRoom(room);
+    }
     // TODO: remove the tab for this room
-    delete roomStates[roomid];
+    delete roomStates[room.id];
+    return switchRoom(Object.keys(roomStates)[0]); // TODO: use the room right next to where we were before.
 }
 
 function onQuit() {
-    // TODO: leave all rooms
     for (let roomid in roomStates) {
         onLeave(roomid);
     }

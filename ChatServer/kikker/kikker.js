@@ -15,7 +15,7 @@ const kikkerShouldAnswers = [
 async function emitMessage(io, user, type, channel, messageContent) {
   console.log(channel, typeof channel)
   const message = {
-    userId: user.userId,
+    userId: user.userId || user.id,
     userName: user.chatNick || user.userName,
     userColor: user.userColor,
     textColor: user.textColor,
@@ -228,13 +228,14 @@ function handleUserCommands(io, socket, channel, command, args) {
       channelManager.join(args, user);
       break;
     case "leave":
-      channelManager.leave(channel, user)
+      channelManager.leave(channel, user, args)
       break;
     case "quit":
-      // channelManager.quit(user);
+      channelManager.quit(user, args);
       break;
     case "me":
-      io.emit("me", `${username} ${args}`); // signal "me" ok? TODO: channel awareness
+      emitMessage(io, user, "me", channel, args);
+      // io.emit("me", `${username} ${args}`); // signal "me" ok? TODO: channel awareness
       break;
     case "activity":
       userStatus.updateUserActivity(user, args);

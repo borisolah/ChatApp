@@ -13,6 +13,8 @@ const Chat = () => {
   const { socket, onlineUsers, messages } = useSocketListener(auth);
   useUnreadMessages(socket);
 
+  // QUESTION: can we create a new <ChatMessages> whenever we join rooms? Maybe use the same approach for tabbing as with users and uploads here, but from code?
+  // (right now, i setMessages() every time room is switched, and it's not ideal because it leads to tons of js errors about "identical key" in the client after returning to a room)
   return (
     <div className="mainBox">
       <div className="mainChat">

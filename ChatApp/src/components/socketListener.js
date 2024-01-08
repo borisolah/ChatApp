@@ -71,16 +71,21 @@ const useSocketListener = (auth) => {
       newSocket.on("join", (room) => {
         const newroom = roomManager.onJoin(room);
         if (newroom) {
-          setOnlineUsers(newroom.users); // TODO: uncomment as soon as users per room work right.
+          setOnlineUsers(newroom.users);
           setMessages(newroom.messages);
         }
       });
 
       newSocket.on("leave", (room) => {
-        roomManager.onLeave(room);
+        console.log("leave", room);
+        const newroom = roomManager.onLeave(room);
+        if (newroom) {
+          setOnlineUsers(newroom.users);
+          setMessages(newroom.messages);
+        }
       });
 
-      newSocket.on("quit", (room) => {
+      newSocket.on("quit", (room) => { // QUESTION: does this ever happen? (so far not, but vanish instead. 8.1.2024)
         roomManager.onQuit(room);
       });
 
@@ -89,7 +94,7 @@ const useSocketListener = (auth) => {
       });
 
       newSocket.on("vanish", () => {
-        window.location.replace("https://www.google.com");
+        window.location.replace("https://www.ddg.gg");
       });
 
       setSocket(newSocket);

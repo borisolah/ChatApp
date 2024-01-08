@@ -69,20 +69,22 @@ try {
   socket.to(username).emit("vanish"); // end any other socket's session that was logged in as the same user.
   socket.join(username); // with this, we can always io.to(username).emit() later.
   channelManager.setSocket(user, socket);
-  channelManager.join(1, user);
+  await channelManager.join(1, user);
   if (user.roles.includes('user')) {
-    channelManager.join(2, user);
-    channelManager.join(3, user);
-    channelManager.join(4, user);
+    await channelManager.join(2, user);
+    await channelManager.join(3, user);
+    await channelManager.join(4, user);
   }
   for (let channel of userStatus.getChannelSubscriptions(user)) {
-    channelManager.join(channel, user);
+    await channelManager.join(channel, user);
   }
   socket.emit("join", 1); // DEFAULT: Welcome Area
   const messages = await fetchMessages(); // TODO: fetchUserChannelsMessages(userid)
   socket.emit("initialMessages", messages);
   socket.on("newMessage", async (messageData) => {
-    //console.log(messageData);
+    if (!channelManager.isInRoom(user, messageData.channel)) {
+      return;
+    }
     try {
       await processChatMessage(messageData, insertMessage, formatMessage, io, socket, user);
     } catch (e) {
@@ -90,14 +92,20 @@ try {
     }
   });
   socket.on("disconnect", () => {
-    disconnectTimers[username] = setTimeout(() => {
+    console.log("disconnect", username, ". setting 2min timeout")
+    disconnectTimers[username] = setTimeout(async () => {
       try {
+        console.log(username, "timeout expired");
         delete disconnectTimers[username];
+        // console.log("timer deleted");
         userStatus.removeOnlineUser(user);
-        channelManager.quit(user, "timeout");
+        // console.log("userStatus.removeOnlineUser done.");
+        await channelManager.quit(user, "timeout");
+        // console.log("channelManager.quit done.")
       } catch (error) {
-        console.log("server.js->socket.on(disconnect): Uncaught error", error);
-    }}, 120000);
+        // console.log("server.js->socket.on(disconnect): Uncaught error", error);
+      }
+    }, 120000);
   });
 } catch (error) {
   console.log("server.js->io.on(connect): Uncaught error", error);
