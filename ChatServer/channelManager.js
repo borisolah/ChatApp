@@ -4,35 +4,49 @@ const { v4: uuidv4 } = require("uuid");
 const sockets = {};
 let _io;
 
-const channels = {
-    1: {
-        id: 1,
-        name: "Welcome Area",
-        users: new Set([]), // TODO: load from DB
-    },
-    2: {
-        id: 2,
-        name: "Questionnaire",
-        users: new Set([]), // TODO: load from DB
-    },
-    3: {
-        id: 3,
-        name: "Fun and Offtopic",
-        users: new Set([]), // TODO: load from DB
-    },
-    4: {
-        id: 4,
-        name: "Hyperspace Chat",
-        users: new Set([]), // TODO: load from DB
-    }
-};
+const kikker = {
+    id: 0,
+    userName: "Kikker",
+    chatNick: "Kikker",
+    mood: "pleased",
+    substance: "bufo",
+    activity: "vision",
+    userColor: "rgb(200,171,182)",
+    textColor: "rgb(145,190,108)"
+}
 
 const userChannels = {};
+const channels = {};
+let channelCount = 0;
 
+function _createChannel(name, users=[]) {
+    const id = ++channelCount;
+    if (channels[id]) {
+        console.error("Tried re-creating channel", id, name, users);
+        return;
+    }
+    channels[id] = {
+        id,
+        name,
+        users: new Set([kikker, ...users])
+    };
+    return id;
+}
 
 function init(io) {
+    if (_io) {
+        console.error("Tried to re-init channelManager");
+        return;
+    }
     _io = io;
+
+    _createChannel("Welcome Area");     // 1
+    _createChannel("Questionnaire");    // 2
+    _createChannel("Fun and Offtopic"); // 3
+    _createChannel("Hyperspace Chat");  // 4
+    // TODO: also create all Channels that already exist in the DB
 }
+
 
 function setSocket(user, socket) {
     console.log("channelManager.setSocket(): user", user, "socket", socket.id);
@@ -62,22 +76,16 @@ async function emitChannelInfo(channel, user, verb, msg='') {
 
 function getChannel(id) {
     let c;
-    id = id.toLowerCase();
+    if (typeof id === "number") {
+        return channels[id] ? id : 0;
+    }
+    const _id = id.toLowerCase();
     for (let x in channels) {
-        if (channels[x].name.toLowerCase() === id) {
-            c = x;
-            id = x;
-            break;
+        if (channels[x].name.toLowerCase() === _id) {
+            return x;
         }
     }
-    if (!c) {
-
-        // TODO: create channel, assign new channelid from DB
-        
-        console.log("Should make new channel now:", id);
-        return 0;
-    }
-    return id;
+    return _createChannel(id);
 }
 
 async function join(channelid, user) {
