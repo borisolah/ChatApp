@@ -24,7 +24,7 @@ async function processChatMessage(
     io.to(messageData.channel).emit("message", formatMessage(newMessage)); 
     await insertMessage(newMessage);
   }
-  handleCommands(io, socket, messageData)  // kikker and /chat
+  handleCommands(io, socket, user, messageData);  // kikker and /chat
 }
 
 module.exports = processChatMessage;
