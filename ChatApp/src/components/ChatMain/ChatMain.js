@@ -20,7 +20,7 @@ const ChatMessages = ({ messages }) => {
               ‹<span className="messageBox messageName" style={{color: message.userColor}}>{message.userName || message.username}</span>›
             </div>
           }
-          <div className="messageBox messageMessage" style={{color: message.type==="message" ? message.textColor : "#977575"}}>{message.message}</div>
+          <div className={["messageBox", "messageMessage", "message-"+message.type].join(' ')} style={{color: message.type==="message" ? message.textColor : undefined/*"#977575"*/}}>{message.message}</div>
         </div>
       ))}
       <div ref={messagesEndRef} />

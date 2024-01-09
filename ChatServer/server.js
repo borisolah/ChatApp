@@ -100,7 +100,7 @@ try {
         // console.log("timer deleted");
         userStatus.removeOnlineUser(user);
         // console.log("userStatus.removeOnlineUser done.");
-        await channelManager.quit(user, "timeout");
+        await channelManager.quit(user, "Timeout");
         // console.log("channelManager.quit done.")
       } catch (error) {
         // console.log("server.js->socket.on(disconnect): Uncaught error", error);
