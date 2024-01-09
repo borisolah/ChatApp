@@ -43,3 +43,12 @@
   padding-left: 6px;
   font-weight: normal;
 }
+ .message-me, .message-pass, .message-info, .message-nick {
+  font-style:italic;
+  color: #977575;
+  font-size: 0.9em;
+ }
+
+ .message-me {
+  font-weight: bold;
+ }
