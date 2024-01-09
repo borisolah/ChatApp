@@ -215,10 +215,15 @@ function makeColor(colorname) {
   return colorname;
 }
 
-function handleUserCommands(io, socket, channel, command, args) {
-  const username = socket.decoded.username.trim();
-  const user = userStatus.findIfOnline(username);
-  console.log("handleUserCommands:", username, command, args)
+async function handleUserCommands(io, socket, channel, user, command, args) {
+  // const username = socket.decoded.username.trim();
+  // const user = userStatus.findIfOnline(username);
+  if (!user || !user.id) {
+    socket.emit("reload");
+    return;
+  }
+  const username = user.chatNick || user.userName;
+  console.log("handleUserCommands:", user.userName, username, command, args)
   switch (command) {
     case "help":
       // TODO: open chat help in new tab in the client
@@ -234,7 +239,7 @@ function handleUserCommands(io, socket, channel, command, args) {
       channelManager.quit(user, args);
       break;
     case "me":
-      emitMessage(io, user, "me", channel, args);
+      emitMessage(io, user, "me", channel, `${username} ${args}`);
       // io.emit("me", `${username} ${args}`); // signal "me" ok? TODO: channel awareness
       break;
     case "activity":
@@ -247,7 +252,8 @@ function handleUserCommands(io, socket, channel, command, args) {
       userStatus.updateUserMood(user, args);
       break;
     case "nick":
-      userStatus.updateUserNick(user, args.slice(0, maxNickLength).trim());
+      await userStatus.updateUserNick(user, args.slice(0, maxNickLength).trim());
+      emitMessage(io, user, "nick", channel, `${username} changed nickname to ${user.chatNick || user.userName}`);
       break;
     case "usercolor":
       userStatus.updateUserColors(user, makeColor(parseTokenFromArgs(args)[0]), user.textColor);
@@ -316,13 +322,13 @@ function handleUserCommands(io, socket, channel, command, args) {
 }
 
 
-function handleCommands(io, socket, messageData) {
+function handleCommands(io, socket, user, messageData) {
   const msg = messageData.message.trim();
   if (messageData.message.startsWith('/')) { // only do user commands if there is no space before the /
     const cend = (msg.indexOf(' ')+1) || msg.length;
     const command = msg.slice(1, cend).trim().toLowerCase();
     const args = msg.slice(cend).trim();
-    handleUserCommands(io, socket, messageData.channel, command, args);
+    handleUserCommands(io, socket, messageData.channel, user, command, args);
   }
   if (msg.slice(0,6).toLowerCase() === "kikker") {
     const kmsg = msg.slice(6).trim();
