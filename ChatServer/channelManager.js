@@ -52,6 +52,9 @@ function setSocket(user, socket) {
     console.log("channelManager.setSocket(): user", user, "socket", socket.id);
     sockets[user.id] = socket;
 }
+function getSocket(user) {
+    return sockets[user.id];
+}
 
 function emitChannelUserlist(channel, socket=undefined) {
     if (socket) {
@@ -154,7 +157,7 @@ function isInRoom(user, channelid) {
 }
 
 module.exports = {
-    init, setSocket,
+    init, setSocket, getSocket,
     join, leave, quit,
     isInRoom,
     userChanged,

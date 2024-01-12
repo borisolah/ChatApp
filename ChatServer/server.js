@@ -92,6 +92,9 @@ try {
     }
   });
   socket.on("disconnect", () => {
+    if (socket.id !== channelManager.getSocket(user).id) {
+      return;
+    }
     console.log("disconnect", username, ". setting 2min timeout")
     disconnectTimers[username] = setTimeout(async () => {
       try {
