@@ -10,6 +10,7 @@ import caffeine from "./substance/caffeine.png";
 import cat from "./substance/cat.png";
 import changa from "./substance/changa.png";
 import choco from "./substance/choco.png";
+import coca from "./substance/coca.png";
 import coffee from "./substance/coffee.png";
 import dmt from "./substance/dmt.png";
 import doggy from "./substance/doggy.png";
@@ -22,6 +23,7 @@ import hash from "./substance/hash.png";
 import hbwr from "./substance/hbwr.png";
 import iboga from "./substance/iboga.png";
 import kava from "./substance/kava.png";
+import khat from "./substance/khat.png";
 import korenwolf from "./substance/korenwolf.png";
 import lc from "./substance/lc.png";
 import lichen from "./substance/lichen.png";
@@ -213,6 +215,7 @@ const substanceImages = {
   cat,
   changa,
   choco,
+  coca,
   coffee,
   dmt,
   doggy,
@@ -226,6 +229,7 @@ const substanceImages = {
   hbwr,
   iboga,
   kava,
+  khat,
   korenwolf,
   lc,
   lichen,
