@@ -37,15 +37,19 @@ async function fetchUserChannelsMessages(userid) {
   return res.rows.map(formatMessage);
 }
 async function insertMessage(message) {
-  await pool.query(
-    `INSERT INTO messages 
-    (id, channel, userid, username, type, message, user_color, text_color, date) 
-    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9);`,
-    [message.id, message.channel, message.userId, message.userName, message.type, 
-     message.message, message.userColor, message.textColor, message.date]
-  );
-  await pool.query(`UPDATE users SET chat_active=NOW() WHERE id=$1;`, 
-  [message.userId]);
+  try {
+    await pool.query(
+      `INSERT INTO messages 
+      (id, channel, userid, username, type, message, user_color, text_color, date) 
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9);`,
+      [message.id, message.channel, message.userId, message.userName, message.type, 
+      message.message, message.userColor, message.textColor, message.date]
+    );
+    await pool.query(`UPDATE users SET chat_active=NOW() WHERE id=$1;`, 
+    [message.userId]);
+  } catch (error) {
+    console.error("! dbOperations.insertMessage:", error);
+  }
 }
 function formatMessage(message) {
   return {
