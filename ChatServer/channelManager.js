@@ -20,7 +20,7 @@ const channels = {};
 let channelCount = 0;
 
 function _createChannel(name, users=[]) {
-    const id = ++channelCount;
+    const id = ++channelCount; // TODO: dbops.createChannel(name, users);
     if (channels[id]) {
         console.error("Tried re-creating channel", id, name, users);
         return;
@@ -30,6 +30,7 @@ function _createChannel(name, users=[]) {
         name,
         users: new Set([kikker, ...users])
     };
+    
     return id;
 }
 
@@ -88,7 +89,7 @@ function getChannel(id) {
             return x;
         }
     }
-    return _createChannel(id);
+    return _createChannel(id); // undefined; // TODO: 
 }
 
 async function join(channelid, user) {
