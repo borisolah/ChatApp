@@ -22,7 +22,7 @@ function makeHTML(message) {
   // TODO: icon conversion :), ;), <3, |9, etc
   // MAYBE: BBcode parsing (probably only for colors)
   let msg = HTMLescape(message.message);
-  
+
   // [b], [i], [u], [s]:
   msg = msg.replaceAll(/\[(\/?[bisu])\]/g, '<$1>');
 
@@ -30,8 +30,9 @@ function makeHTML(message) {
   const match = UrlRegex.exec(msg);
   if (match) {
     const url = match[1];
-    message.message = parse(msg.replace(url, `<a href="${url}" target="_blank" rel="noreferrer">${abbreviateUrl(url)}</a>`)); 
+    msg = msg.replace(url, `<a href="${url}" target="_blank" rel="noreferrer">${abbreviateUrl(url)}</a>`);
   }
+  message.message = parse(msg); 
   return message;
 }
 
