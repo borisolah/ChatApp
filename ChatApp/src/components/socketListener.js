@@ -10,7 +10,7 @@ function abbreviateUrl(url) {
   return url;
 }
 
-const UrlRegex = /((http|https|ftp|sftp|ipfs):\/\/[^\\/?#@() ]+\.[a-zA-Z]+(\/[^/? ]+)*\/?(\?[^=& ]+=[^=& ]+(&[^=& ]+=[^=& ]+)*)?)/;
+const UrlRegex = /((http|https|ftp|sftp|ipfs):\/\/[^\\/?#@() ]+\.[a-zA-Z]+(\/[^/? ]+)*\/?(\?[^=& ]+=[^=& ]+(&[^=& ]+=[^& ]+)*)?)/;
 
 function HTMLescape(text) {
   const div = document.createElement('div');
@@ -18,8 +18,15 @@ function HTMLescape(text) {
   return div.innerHTML;
 }
 function makeHTML(message) {
-  // TODO: temperature conversion, maybe BBcode parsing
+  // TODO: temperature conversion
+  // TODO: icon conversion :), ;), <3, |9, etc
+  // MAYBE: BBcode parsing (probably only for colors)
   let msg = HTMLescape(message.message);
+  
+  // [b], [i], [u], [s]:
+  msg = msg.replaceAll(/\[(\/?[bisu])\]/g, '<$1>');
+
+  // URL recognition:
   const match = UrlRegex.exec(msg);
   if (match) {
     const url = match[1];

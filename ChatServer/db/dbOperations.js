@@ -1,5 +1,25 @@
 const pool = require("./index");
 
+/* // TODO: db layout upgrades, instead of deleting and re-initialising the entire database every time.
+ * // this should probably be a transaction, ie. either all the commands go through, or no changes will be applied,
+ * let dbVersion;
+ * try {
+ *   dbVersion = pool.query(...)
+ * } catch {
+ *   pool.query(...) // CREATE TABLE and such to establish the versioning system.
+ *   dbVersion = <first version that has the version table>;
+ * }
+ * if (dbVersion < oldestUpgrade) {
+ *   pool.query(...) // ALTER TABLE, CREATE TABLE, stuff like that. to get to the next db format version.
+ *   dbVersion = <next version>;
+ * }
+ * ...
+ * if (dbVersion < current) {
+ *   pool.query(...) // ALTER TABLE, CREATE TABLE, stuff like that. to get to the next db format version.
+ *   dbVersion = <current version>;
+ * }
+ */
+
 async function fetchMessages() {
   const res = await pool.query(
     `SELECT 
