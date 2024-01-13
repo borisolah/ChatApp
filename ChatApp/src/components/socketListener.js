@@ -10,7 +10,7 @@ function abbreviateUrl(url) {
   return url;
 }
 
-const UrlRegex = /((http|https|ftp|sftp|ipfs):\/\/[^\\/?#@() ]+\.[a-zA-Z]+(\/[^/? ]+)*\/?(\?[^=& ]+=[^=& ]+(&[^=& ]+=[^& ]+)*)?)/;
+const UrlRegex = /((http|https|ftp|sftp|ipfs):\/\/[^\\/?#@() ]+\.[a-zA-Z]+(:\d+)?(\/[^/? ]+)*\/?(\?[^=& ]+=[^=& ]+(&[^=& ]+=[^& ]+)*)?)/g;
 
 function HTMLescape(text) {
   const div = document.createElement('div');
@@ -30,7 +30,7 @@ function makeHTML(message) {
   const match = UrlRegex.exec(msg);
   if (match) {
     const url = match[1];
-    msg = msg.replace(url, `<a href="${url}" target="_blank" rel="noreferrer">${abbreviateUrl(url)}</a>`);
+    msg = msg.replaceAll(UrlRegex, (url) => `<a href="${url}" target="_blank" rel="noreferrer">${abbreviateUrl(url)}</a>`);
   }
   message.message = parse(msg); 
   return message;
