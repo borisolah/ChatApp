@@ -20,20 +20,45 @@ function HTMLescape(text) {
 function makeHTML(message) {
   // TODO: temperature conversion
   // TODO: icon conversion :), ;), <3, |9, etc
-  // MAYBE: BBcode parsing (probably only for colors)
+  // MAYBE: BBcode color parsing
   let msg = HTMLescape(message.message);
 
   // [b], [i], [u], [s]:
   msg = msg.replaceAll(/\[(\/?[bisu])\]/g, '<$1>');
 
+  // temp conversion:
+  msg = msg.replaceAll(/(\d*\.?\d+°?[cf])\b/ig, (t) => `${t} <span style="color:#999">(${convertTemperature(t)})</span>`);
+
+  // emojis:
+  msg = msg.replaceAll(/&lt;33/g, '💗');
+  msg = msg.replaceAll(/&lt;3/g, '❤️');
+  msg = msg.replaceAll(/\(:/g, '🙃');
+  msg = msg.replaceAll(/\:\)/g, '😊');
+  msg = msg.replaceAll(/;\)/g, '😉');
+  msg = msg.replaceAll(/\:D/ig, '😄');
+  msg = msg.replaceAll(/\:P/ig, '😋');
+  msg = msg.replaceAll(/\:\|/g, '😐');
+  msg = msg.replaceAll(/\:\(/g, '☹️');
+
   // URL recognition:
-  const match = UrlRegex.exec(msg);
-  if (match) {
-    const url = match[1];
-    msg = msg.replaceAll(UrlRegex, (url) => `<a href="${url}" target="_blank" rel="noreferrer">${abbreviateUrl(url)}</a>`);
-  }
+  msg = msg.replaceAll(UrlRegex, (url) => `<a href="${url}" target="_blank" rel="noreferrer">${abbreviateUrl(url)}</a>`);
+
+  
   message.message = parse(msg); 
   return message;
+}
+
+function convertTemperature(t) {
+  //return '?K';
+  let [match, n, d] = /(\d*\.?\d+)°?([cf])/i.exec(t);
+  d = d.toLowerCase();
+  console.log(n, d);
+  switch (d) {
+    case 'f':
+      return `${(parseFloat(n) - 32) / 1.8}°C`;
+    case 'c':
+      return `${parseFloat(n) * 1.8 + 32}°F`;
+  }
 }
 
 const useSocketListener = (auth) => {
