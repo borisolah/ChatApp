@@ -283,38 +283,46 @@ async function handleUserCommands(io, socket, channel, user, command, args) {
       break;
     case "kick":
       if (user) {
-        const [kickname, reason] = parseTokenFromArgs(args)
-        const tobekicked = userStatus.findIfOnline( kickname );
-        if (tobekicked) {
-          if (canKick(user, tobekicked)) {
-            // TODO: actually kick that user *from this room*
-            emitMessage(io, kikker, "info", channel `${tobekicked.username} was kicked by ${username} (REASON: ${reason||"no reason"})`); // signal "info" ok?
+        try {
+          const [kickname, reason] = parseTokenFromArgs(args)
+          const tobekicked = userStatus.findIfOnline( kickname );
+          if (tobekicked) {
+            if (canKick(user, tobekicked)) {
+              // TODO: actually kick that user *from this room*
+              emitMessage(io, kikker, "info", channel `${tobekicked.userName} was kicked by ${username} (REASON: ${reason||"no reason"})`); // signal "info" ok?
+              break;
+            }
+            socket.emit("warning", `You do not have sufficient rights to kick ${tobekicked.userName}`);
             break;
-          }
-          socket.emit("warning", `You do not have sufficient rights to kick ${tobekicked.username}`);
+          } 
+          socket.emit("warning", `No such active user: ${kickname}`);
           break;
-        } 
-        socket.emit("warning", `No such active user: ${tobekicked.username}`);
-        break;
+        } catch (error) {
+          console.log("userCommands.ban:", error);
+        }
       }
       socket.emit("reload"); // socket used a username that's not in onlineUsersList, make their page reload.
       break;
     case "ban":
       if (user) {
-        const [banname, reason] = parseTokenFromArgs(args)
-        const tobebanned = userStatus.findIfOnline( banname );
-        if (tobebanned) {
-          if (canKick(user, tobebanned)) {
-            // TODO: actually ban that user *from this room*
-            emitMessage(io, kikker, "info", channel, `${tobebanned.username} was banned by ${username} (REASON: ${reason.trim() ||"no reason"})`);
-            handleUserCommands(io, socket, channel, "kick", args.replace(reason, reason || "BAN"));
+        try {
+          const [banname, reason] = parseTokenFromArgs(args)
+          const tobebanned = userStatus.findIfOnline( banname );
+          if (tobebanned) {
+            if (canKick(user, tobebanned)) {
+              // TODO: actually ban that user *from this room*
+              emitMessage(io, kikker, "info", channel, `${tobebanned.userName} was banned by ${username} (REASON: ${reason.trim() ||"no reason"})`);
+              handleUserCommands(io, socket, channel, "kick", args.replace(reason, reason || "BAN"));
+              break;
+            }
+            socket.emit("warning", `You do not have sufficient rights to kick ${tobebanned.userName}`);
             break;
-          }
-          socket.emit("warning", `You do not have sufficient rights to kick ${tobebanned.username}`);
+          } 
+          socket.emit("warning", `No such active user: ${banname}`);
           break;
-        } 
-        socket.emit("warning", `No such active user: ${tobebanned.username}`);
-        break;
+        } catch (error) {
+          console.log("userCommands.ban:", error);
+        }
       }
       socket.emit("reload"); // socket used a username that's not in onlineUsersList, make their page reload.
       break;
