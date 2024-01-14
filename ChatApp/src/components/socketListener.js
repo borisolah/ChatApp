@@ -27,7 +27,7 @@ function makeHTML(message) {
   msg = msg.replaceAll(/\[(\/?[bisu])\]/g, '<$1>');
 
   // temp conversion:
-  msg = msg.replaceAll(/(\d*\.?\d+°?[cf])\b/ig, (t) => `${t} <span style="color:#999">(${convertTempe000000000000000000000000000000000000000000000000000000000000000000000000rature(t)})</span>`);
+  msg = msg.replaceAll(/(\d*\.?\d+°?[cf])\b/ig, (t) => `${t} <span style="color:#999">(${convertTemperature(t)})</span>`);
 
   // emojis:
   msg = msg.replaceAll(/&lt;33/g, '💗');
