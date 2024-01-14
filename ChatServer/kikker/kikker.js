@@ -274,7 +274,7 @@ async function handleUserCommands(io, socket, channel, user, command, args) {
     case "pass":
       const [passto, thing] = parseTokenFromArgs(args);
       //const thing = args.slice(passto.length + 1).trim(); // this will start with " if the name was in quotes.
-      if (userStatus.findIfOnline(onlineUsersList, passto)) {
+      if (userStatus.findIfOnline(passto)) {
         // TODO: (in the frontend?) recognise if this is a special thing with an animation.
         emitMessage(io, user, "pass", channel, `${username} passes ${thing} to ${passto}`) // 'pass' signal ok?
       } else {
